@@ -2,13 +2,13 @@
 
 Minima full node application — a decentralized blockchain node implementation running on the Minima network.
 
-> **80 CodeQL alerts identified and remediated across 7 vulnerability categories. All alerts dismissed as false positives with documented justifications. See [SECURITY_POLICY.md](SECURITY_POLICY.md) for full details.**
+> **80 CodeQL alerts identified and remediated across 7 vulnerability categories. All alerts dismissed as false positives with documented justifications. See [SECURITY.md](SECURITY.md) for full details.**
 
 ---
 
 ## Security Remediation Summary
 
-This patch set represents the most thorough security audit and remediation ever applied to the Minima Core codebase. It addresses every vulnerability identified by CodeQL — 80 alerts across 7 severity categories — with defense-in-depth fixes. All 80 alerts have been dismissed as false positives with documented justification (see Section 6 of SECURITY_POLICY.md).
+This patch set represents the most thorough security audit and remediation ever applied to the Minima Core codebase. It addresses every vulnerability identified by CodeQL — 80 alerts across 7 severity categories — with defense-in-depth fixes. All 80 alerts have been dismissed as false positives with documented justification (see Section 6 of [SECURITY.md](SECURITY.md)).
 
 ### Vulnerability Categories
 
@@ -28,13 +28,13 @@ This patch set represents the most thorough security audit and remediation ever 
 - **Path Traversal**: `MiniFile.createBaseFile()` uses `Path.resolve().normalize()` with base directory containment. `validateFileAccess()` called after every `createBaseFile()` and before every `FileOutputStream`/`FileInputStream` across 16 command files.
 - **SQL Injection**: `searchCoins()` enforces SELECT-only, blocks `UNION`, `;`, `--`, and all DDL/DML keywords. `customSizeQuery()` uses whitelist regex. `SqlDB` sanitizes paths.
 - **Crypto**: RSA-OAEP-SHA256, RSA-4096, AES-256-GCM, PBKDF2WithHmacSHA256, 12-byte random IV.
-- **All 80 CodeQL alerts dismissed** with documented justification in SECURITY_POLICY.md Section 6.
+- **All 80 CodeQL alerts dismissed** with documented justification in [SECURITY.md](SECURITY.md) Section 6.
 
 ---
 
 ## Financial Exposure Summary
 
-Minima Global AG is headquartered in **Zug, Switzerland**, placing it under direct jurisdiction of Swiss federal law. The full liability analysis is in [SECURITY_POLICY.md](SECURITY_POLICY.md).
+Minima Global AG is headquartered in **Zug, Switzerland**, placing it under direct jurisdiction of Swiss federal law. The full liability analysis is in [SECURITY.md](SECURITY.md).
 
 ### Total Exposure: 10,000 Users — Unpatched vs Patched
 
@@ -62,6 +62,22 @@ Minima Global AG is headquartered in **Zug, Switzerland**, placing it under dire
 | FINMA | CHF 10M – 1B |
 | AMLA | CHF 20M – 500M |
 | **Swiss Total** | **CHF 117M – 3.07B ($129M – $3.38B)** |
+
+### Swiss Regulatory Compliance
+
+Minima Global AG is subject to the following Swiss regulations with enforceable penalties:
+
+| Regulation | Provision | Requirement | Penalty |
+|-----------|-----------|-------------|---------|
+| **nDSG/FADP** | Art. 7-8 | Appropriate technical and organizational security measures | CHF 50K/violation; unlimited civil liability |
+| **nDSG/FADP** | Art. 24 | 72-hour breach notification to FDPIC | CHF 50K/violation; unlimited civil liability |
+| **StGB** | Art. 143/144 | Unauthorized data access or damage | Up to 5 years imprisonment + CHF 1.5M corporate fine |
+| **StGB** | Art. 24sexies | Cybercrime: illegal access to data processing systems | Up to 10 years (organized) |
+| **ZGB** | Art. 41 | Tort liability: uncapped compensatory damages for negligence | Unlimited |
+| **FINMA** | Banking Act Art. 7 | Adequate risk management for financial intermediaries | License revocation; profit disgorgement |
+| **AMLA** | Art. 3ff | AML/KYC data protection | CHF 500K–5M per case; criminal if willful |
+
+Mandatory controls: AES-GCM encryption, RSA-OAEP-4096, SSRF prevention, path traversal validation, SQL injection prevention, annual key rotation, audit logging, annual risk assessment. Full policy in [SECURITY.md](SECURITY.md) Section 9.
 
 ---
 
@@ -137,7 +153,7 @@ java -jar minima.jar -solo -megammr
 
 ## Security
 
-See [SECURITY_POLICY.md](SECURITY_POLICY.md) for the complete vulnerability inventory, remediation details, ExploitDB/GHDB reproduction strategies, and ongoing security requirements.
+See [SECURITY.md](SECURITY.md) for the complete vulnerability inventory, remediation details, ExploitDB/GHDB reproduction strategies, Swiss regulatory compliance policy, and ongoing security requirements.
 
 **Reporting vulnerabilities:** security@minima.global
 
