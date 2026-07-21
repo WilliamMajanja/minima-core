@@ -1,0 +1,21 @@
+name: minima-sanitizers
+version: 1.0.0
+libraryPathDependencies:
+  - codeql/java-all
+extensions:
+
+  - addsTo:
+      pack: codeql/java-queries
+      extensible: sanitizerModel
+    data:
+      - ["org.minima.utils.MiniFile", "sanitizeFileName", "(String)", "", "Argument[0]", "ReturnValue"]
+      - ["org.minima.utils.MiniFile", "createBaseFile", "(String)", "", "ReturnValue", "ReturnValue"]
+      - ["org.minima.utils.MiniFile", "validateFileAccess", "(File)", "", "Argument[0]", "Argument[0]"]
+      - ["org.minima.utils.RPCClient", "validateAndResolveURI", "(String)", "", "Argument[0]", "ReturnValue"]
+      - ["org.minima.utils.mysql.MySQLConnect", "validateAndResolveHost", "(String)", "", "Argument[0]", "ReturnValue"]
+
+  - addsTo:
+      pack: codeql/java-queries
+      extensible: neutralModel
+    data:
+      - ["org.minima.utils.MiniFile", "createBaseFile", "(String)", "", "Argument[0]", "neutral"]

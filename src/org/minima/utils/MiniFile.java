@@ -29,12 +29,12 @@ public class MiniFile {
 			return null;
 		}
 		String sanitized = zFilename.replace("../", "").replace("..\\", "");
-		File file = new File(sanitized);
-		String name = file.getName();
+		Path normalized = Paths.get(sanitized).normalize();
+		String name = normalized.getFileName() != null ? normalized.getFileName().toString() : "";
 		if (name.isEmpty() || name.equals(".") || name.equals("..")) {
 			throw new IllegalArgumentException("Invalid file name: " + zFilename);
 		}
-		return sanitized;
+		return normalized.toString();
 	}
 	
 	public static File createBaseFile(String zFilename) {
@@ -43,56 +43,44 @@ public class MiniFile {
 			throw new IllegalArgumentException("Filename cannot be null");
 		}
 		
-		String basePath;
+		Path basePath;
 		if (GeneralParams.BASE_FILE_FOLDER.equals("")) {
-			basePath = new File(".").getAbsolutePath();
+			basePath = Paths.get(".").toAbsolutePath().normalize();
 		} else {
-			basePath = GeneralParams.BASE_FILE_FOLDER;
+			basePath = Paths.get(GeneralParams.BASE_FILE_FOLDER).toAbsolutePath().normalize();
 		}
 		
-		File baseDir = new File(basePath);
-		File retfile = new File(baseDir, sanitized);
+		Path resolvedPath = basePath.resolve(sanitized).normalize();
 		
-		try {
-			String canonicalBase = baseDir.getCanonicalPath();
-			String canonicalFile = retfile.getCanonicalPath();
-			if (!canonicalFile.startsWith(canonicalBase + File.separator) && !canonicalFile.equals(canonicalBase)) {
-				throw new SecurityException("Path traversal detected: " + zFilename);
-			}
-		} catch (java.io.IOException e) {
-			throw new SecurityException("Invalid file path: " + zFilename, e);
+		if (!resolvedPath.startsWith(basePath)) {
+			throw new SecurityException("Path traversal detected: " + zFilename);
 		}
 		
-		File canonicalFile;
-		try {
-			canonicalFile = retfile.getCanonicalFile();
-		} catch (java.io.IOException e) {
-			throw new SecurityException("Invalid file path: " + zFilename, e);
-		}
+		File retfile = resolvedPath.toFile();
 		
 		//Make sure the parent exist..
-		String parent = canonicalFile.getParent();
+		String parent = retfile.getParent();
 		if(parent!=null) {
 			File pp = new File(parent);
 			pp.mkdirs();
 		}
 		
-		return canonicalFile;
+		return retfile;
 	}
 	
 	public static void validateFileAccess(File zFile) throws SecurityException {
 		if (zFile == null) {
 			throw new SecurityException("File is null");
 		}
-		String base = GeneralParams.BASE_FILE_FOLDER.equals("") ? "." : GeneralParams.BASE_FILE_FOLDER;
-		try {
-			String canonicalBase = new File(base).getCanonicalPath();
-			String canonicalFile = zFile.getCanonicalPath();
-			if (!canonicalFile.startsWith(canonicalBase + File.separator) && !canonicalFile.equals(canonicalBase)) {
-				throw new SecurityException("Path traversal detected: " + zFile.getAbsolutePath());
-			}
-		} catch (java.io.IOException e) {
-			throw new SecurityException("Invalid file path: " + zFile.getAbsolutePath(), e);
+		Path basePath;
+		if (GeneralParams.BASE_FILE_FOLDER.equals("")) {
+			basePath = Paths.get(".").toAbsolutePath().normalize();
+		} else {
+			basePath = Paths.get(GeneralParams.BASE_FILE_FOLDER).toAbsolutePath().normalize();
+		}
+		Path filePath = zFile.toPath().toAbsolutePath().normalize();
+		if (!filePath.startsWith(basePath)) {
+			throw new SecurityException("Path traversal detected: " + zFile.getAbsolutePath());
 		}
 	}
 	

@@ -104,16 +104,9 @@ public class GenerateKey {
 	
 	public static Cipher getCipherSYM(int zCipherMode, byte[] zIvParam, byte[] zSecretKey) throws Exception {
     	
-		byte[] ivBytes;
-		if (zIvParam == null) {
-			ivBytes = IvParam();
-		} else {
+		byte[] ivBytes = IvParam();
+		if (zIvParam != null && zIvParam.length >= 12) {
 			ivBytes = zIvParam;
-		}
-		if (ivBytes.length != 12) {
-			byte[] trimmed = new byte[12];
-			System.arraycopy(ivBytes, 0, trimmed, 0, Math.min(ivBytes.length, 12));
-			ivBytes = trimmed;
 		}
 		SecretKey sk 		= GenerateKey.convertSecret(zSecretKey);    	
 		GCMParameterSpec gcmSpec = new GCMParameterSpec(128, ivBytes);

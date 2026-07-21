@@ -22,7 +22,7 @@ public class RPCClient {
 	
 	public static String USER_AGENT = "Minima/1.0";
 	
-	private static String validateAndResolveURL(String zUrl) throws IOException {
+	private static URI validateAndResolveURI(String zUrl) throws IOException {
 		try {
 			URI uri = new URI(zUrl);
 			String scheme = uri.getScheme();
@@ -37,16 +37,15 @@ public class RPCClient {
 			if (addr.isLoopbackAddress() || addr.isLinkLocalAddress() || addr.isSiteLocalAddress()) {
 				throw new IOException("Invalid URL: private/reserved addresses not allowed - " + host);
 			}
-			String resolvedHost = addr.getHostAddress();
 			int port = uri.getPort();
 			String pathAndQuery = uri.getRawPath();
 			if (uri.getRawQuery() != null) {
 				pathAndQuery = pathAndQuery + "?" + uri.getRawQuery();
 			}
 			if (port != -1) {
-				return scheme + "://" + resolvedHost + ":" + port + pathAndQuery;
+				return new URI(scheme, null, addr.getHostAddress(), port, pathAndQuery, null, null);
 			}
-			return scheme + "://" + resolvedHost + pathAndQuery;
+			return new URI(scheme, null, addr.getHostAddress(), uri.getPort() != -1 ? uri.getPort() : -1, pathAndQuery, null, null);
 		} catch (java.net.URISyntaxException e) {
 			throw new IOException("Invalid URL: " + zUrl, e);
 		}
@@ -54,15 +53,15 @@ public class RPCClient {
 	
 	@SuppressWarnings("deprecation")
 	private static HttpURLConnection openSafeConnection(String zUrl) throws IOException {
-		String safeUrl = validateAndResolveURL(zUrl);
-		URL url = new URL(safeUrl);
+		URI safeUri = validateAndResolveURI(zUrl);
+		URL url = safeUri.toURL();
 		return (HttpURLConnection) url.openConnection();
 	}
 	
 	@SuppressWarnings("deprecation")
 	private static HttpsURLConnection openSafeHTTPSConnection(String zUrl) throws IOException {
-		String safeUrl = validateAndResolveURL(zUrl);
-		URL url = new URL(safeUrl);
+		URI safeUri = validateAndResolveURI(zUrl);
+		URL url = safeUri.toURL();
 		return (HttpsURLConnection) url.openConnection();
 	}
 	
