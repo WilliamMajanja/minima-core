@@ -12,6 +12,7 @@ import org.minima.objects.IBD;
 import org.minima.objects.TxBlock;
 import org.minima.objects.base.MiniByte;
 import org.minima.objects.base.MiniNumber;
+import org.minima.utils.MiniFile;
 import org.minima.utils.MinimaLogger;
 
 public class RawArchiveInput {
@@ -33,6 +34,7 @@ public class RawArchiveInput {
 	}
 	
 	public void connect() throws IOException {
+		MiniFile.validateFileAccess(mFile);
 		mFileIn = new FileInputStream(mFile);
 		mBuffIn	= new BufferedInputStream(mFileIn,65536);
 		mGzin	= new GZIPInputStream(mBuffIn, 65536);

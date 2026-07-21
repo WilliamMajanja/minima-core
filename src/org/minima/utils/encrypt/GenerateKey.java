@@ -17,6 +17,7 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -27,7 +28,7 @@ public class GenerateKey {
 	public static final String 	ASYMETRIC_ALGORITHM 	= "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
 	
 	private static final String SYMETRIC_ALGORITHM_GEN  = "AES";
-	private static final String SYMETRIC_ALGORITHM  	= "AES/CBC/PKCS5Padding";
+	private static final String SYMETRIC_ALGORITHM  	= "AES/GCM/NoPadding";
 	
 	private static final String SYMETRIC_PASSWORD_ALGORITHM  = "PBKDF2WithHmacSHA256";
 	
@@ -108,10 +109,10 @@ public class GenerateKey {
 			zIvParam = IvParam();
 		}
 		SecretKey sk 		= GenerateKey.convertSecret(zSecretKey);    	
-		IvParameterSpec iv 	= new IvParameterSpec(zIvParam);
+		GCMParameterSpec gcmSpec = new GCMParameterSpec(128, zIvParam);
     	
 		Cipher aesCipher 	= GenerateKey.getSymetricCipher();
-		aesCipher.init(zCipherMode, sk, iv);
+		aesCipher.init(zCipherMode, sk, gcmSpec);
 		
     	return aesCipher;
     }

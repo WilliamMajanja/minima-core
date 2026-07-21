@@ -34,6 +34,15 @@ public class MiniFile {
 		if (name.isEmpty() || name.equals(".") || name.equals("..")) {
 			throw new IllegalArgumentException("Invalid file name: " + zFilename);
 		}
+		try {
+			String canonicalPath = file.getCanonicalPath();
+			String base = GeneralParams.BASE_FILE_FOLDER.equals("") ? new File(".").getCanonicalPath() : new File(GeneralParams.BASE_FILE_FOLDER).getCanonicalPath();
+			if (!canonicalPath.startsWith(base + File.separator) && !canonicalPath.equals(base)) {
+				throw new IllegalArgumentException("Path traversal detected: " + zFilename);
+			}
+		} catch (java.io.IOException e) {
+			throw new IllegalArgumentException("Invalid file path: " + zFilename, e);
+		}
 		return sanitized;
 	}
 	
@@ -48,16 +57,6 @@ public class MiniFile {
 			retfile = new File(GeneralParams.BASE_FILE_FOLDER, zFilename);
 		}
 		
-		try {
-			String canonicalBase = new File(GeneralParams.BASE_FILE_FOLDER.equals("") ? "." : GeneralParams.BASE_FILE_FOLDER).getCanonicalPath();
-			String canonicalFile = retfile.getCanonicalPath();
-			if (!canonicalFile.startsWith(canonicalBase + File.separator) && !canonicalFile.equals(canonicalBase)) {
-				throw new SecurityException("Path traversal detected: " + zFilename);
-			}
-		} catch (java.io.IOException ioe) {
-			throw new SecurityException("Invalid file path: " + zFilename, ioe);
-		}
-		
 		//Make sure the parent exist..
 		String parent = retfile.getParent();
 		if(parent!=null) {
@@ -68,12 +67,29 @@ public class MiniFile {
 		return retfile;
 	}
 	
+	public static void validateFileAccess(File zFile) throws SecurityException {
+		if (zFile == null) {
+			throw new SecurityException("File is null");
+		}
+		String base = GeneralParams.BASE_FILE_FOLDER.equals("") ? "." : GeneralParams.BASE_FILE_FOLDER;
+		try {
+			String canonicalBase = new File(base).getCanonicalPath();
+			String canonicalFile = zFile.getCanonicalPath();
+			if (!canonicalFile.startsWith(canonicalBase + File.separator) && !canonicalFile.equals(canonicalBase)) {
+				throw new SecurityException("Path traversal detected: " + zFile.getAbsolutePath());
+			}
+		} catch (java.io.IOException e) {
+			throw new SecurityException("Invalid file path: " + zFile.getAbsolutePath(), e);
+		}
+	}
+	
 	
 	public static void writeDataToFile(File zFile, byte[] zData) throws IOException {
 		writeDataToFile(zFile, zData, false);
 	}
 	
 	public static void writeDataToFile(File zFile, byte[] zData, boolean zAppend) throws IOException {
+		validateFileAccess(zFile);
 		//Check Parent
 		File parent = zFile.getAbsoluteFile().getParentFile();
 		if(!parent.exists()) {
@@ -130,6 +146,7 @@ public class MiniFile {
 	}
 	
 	public static byte[] readCompleteFile(File zFile) throws IOException {
+		validateFileAccess(zFile);
     	long size  = zFile.length();
     	byte[] ret = new byte[(int) size];
     	
@@ -145,6 +162,12 @@ public class MiniFile {
 	}
 	
 	public static void loadObject(File zFile, Streamable zObject) {
+		try {
+			validateFileAccess(zFile);
+		} catch (SecurityException e) {
+			MinimaLogger.log("Path traversal blocked: " + e.getMessage());
+			return;
+		}
 		//Does the File exist
 		if(!zFile.exists()) {
 			MinimaLogger.log("Load Object file does not exist : "+zFile.getAbsolutePath());
@@ -168,6 +191,12 @@ public class MiniFile {
 	}
 	
 	public static void loadObjectSlow(File zFile, Streamable zObject) {
+		try {
+			validateFileAccess(zFile);
+		} catch (SecurityException e) {
+			MinimaLogger.log("Path traversal blocked: " + e.getMessage());
+			return;
+		}
 		//Does the File exist
 		if(!zFile.exists()) {
 			MinimaLogger.log("Load Object file does not exist : "+zFile.getAbsolutePath());
@@ -190,6 +219,12 @@ public class MiniFile {
 	}
 	
 	public static void loadObjectEncrypted(String zPassword, File zFile, Streamable zObject) {
+		try {
+			validateFileAccess(zFile);
+		} catch (SecurityException e) {
+			MinimaLogger.log("Path traversal blocked: " + e.getMessage());
+			return;
+		}
 		//Does the File exist
 		if(!zFile.exists()) {
 			MinimaLogger.log("Load Object file does not exist : "+zFile.getAbsolutePath());
@@ -229,6 +264,7 @@ public class MiniFile {
 	}
 	
 	public static void saveObjectDirect(File zFile, Streamable zObject) {
+		validateFileAccess(zFile);
 		//Check Parent
 		File parent = zFile.getAbsoluteFile().getParentFile();
 		if(!parent.exists()) {
@@ -311,6 +347,8 @@ public class MiniFile {
 	}
 	
 	public static void copyFileOrFolder(File zOrig, File zCopy) throws IOException {
+		validateFileAccess(zOrig);
+		validateFileAccess(zCopy);
 		//Check file exists
 		if(!zOrig.exists()){
 			MinimaLogger.log("Trying to copy file that does not exist "+zOrig.getAbsolutePath());

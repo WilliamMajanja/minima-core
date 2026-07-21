@@ -20,7 +20,7 @@ public class RPCClient {
 	
 	public static String USER_AGENT = "Minima/1.0";
 	
-	private static void validateURL(String zUrl) throws IOException {
+	private static String validateAndResolveURL(String zUrl) throws IOException {
 		try {
 			URI uri = new URI(zUrl);
 			String scheme = uri.getScheme();
@@ -35,6 +35,16 @@ public class RPCClient {
 			if (addr.isLoopbackAddress() || addr.isLinkLocalAddress() || addr.isSiteLocalAddress()) {
 				throw new IOException("Invalid URL: private/reserved addresses not allowed - " + host);
 			}
+			String resolvedHost = addr.getHostAddress();
+			int port = uri.getPort();
+			String pathAndQuery = uri.getRawPath();
+			if (uri.getRawQuery() != null) {
+				pathAndQuery = pathAndQuery + "?" + uri.getRawQuery();
+			}
+			if (port != -1) {
+				return scheme + "://" + resolvedHost + ":" + port + pathAndQuery;
+			}
+			return scheme + "://" + resolvedHost + pathAndQuery;
 		} catch (java.net.URISyntaxException e) {
 			throw new IOException("Invalid URL: " + zUrl, e);
 		}
@@ -49,9 +59,9 @@ public class RPCClient {
 	}
 	
 	public static String sendGETBasicAuth(String zHost, String zUser, String zPassword) throws IOException {
-		validateURL(zHost);
+		String resolvedUrl = validateAndResolveURL(zHost);
 		//Create the URL
-		URL obj = new URL(zHost);
+		URL obj = new URL(resolvedUrl);
 		
 		//Open her up
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -91,9 +101,9 @@ public class RPCClient {
 	}
 	
 	public static String sendGETHTTPS(String zHost) throws IOException {
-		validateURL(zHost);
+		String resolvedUrl = validateAndResolveURL(zHost);
 		//Create the URL
-		URL obj = new URL(zHost);
+		URL obj = new URL(resolvedUrl);
 		
 		//Open her up
 		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
@@ -130,9 +140,9 @@ public class RPCClient {
 	}
 	
 	public static String sendGETBasicAuthSSL(String zHost, String zUser, String zPassword, SSLContext zSSLContext) throws IOException {
-		validateURL(zHost);
+		String resolvedUrl = validateAndResolveURL(zHost);
 		//Create the URL
-		URL obj = new URL(zHost);
+		URL obj = new URL(resolvedUrl);
 		
 		//Open her up
 		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
@@ -173,9 +183,9 @@ public class RPCClient {
 	}
 	
 	public static String sendPUT(String zHost) throws IOException {
-		validateURL(zHost);
+		String resolvedUrl = validateAndResolveURL(zHost);
 		//Create the URL
-		URL obj = new URL(zHost);
+		URL obj = new URL(resolvedUrl);
 		
 		//Open her up
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -216,8 +226,8 @@ public class RPCClient {
 	}
 	
 	public static String sendPOST(String zHost, String zParams, String zType) throws IOException {
-		validateURL(zHost);
-		URL obj = new URL(zHost);
+		String resolvedUrl = validateAndResolveURL(zHost);
+		URL obj = new URL(resolvedUrl);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 		con.setConnectTimeout(10000);
 		con.setInstanceFollowRedirects(true);
@@ -257,8 +267,8 @@ public class RPCClient {
 	}
 	
 	public static String sendPOSTHTTPS(String zHost, String zParams, String zType) throws IOException {
-		validateURL(zHost);
-		URL obj = new URL(zHost);
+		String resolvedUrl = validateAndResolveURL(zHost);
+		URL obj = new URL(resolvedUrl);
 		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 		con.setConnectTimeout(10000);
 		con.setInstanceFollowRedirects(true);
@@ -301,10 +311,10 @@ public class RPCClient {
 	 * Send GET request with an AUTH token
 	 */
 	public static String sendGETAuth(String zHost, String zAuthToken) throws IOException {
-		validateURL(zHost);
+		String resolvedUrl = validateAndResolveURL(zHost);
 		
 		//Create the URL
-		URL obj = new URL(zHost);
+		URL obj = new URL(resolvedUrl);
 		
 		//MinimaLogger.log("GETAUTH : "+zHost+" "+zAuthToken);
 		

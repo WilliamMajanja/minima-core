@@ -63,7 +63,7 @@ public class MySQLConnect {
 		this(zHost, zDatabase, zUsername, zPassword, false);
 	}
 	
-	private static void validateHost(String zHost) throws SQLException {
+	private static String validateAndResolveHost(String zHost) throws SQLException {
 		try {
 			String hostPart = zHost;
 			int colonIdx = zHost.indexOf(':');
@@ -74,6 +74,11 @@ public class MySQLConnect {
 			if (addr.isLoopbackAddress() || addr.isLinkLocalAddress() || addr.isSiteLocalAddress()) {
 				throw new SQLException("Invalid MySQL host: private/reserved addresses not allowed - " + hostPart);
 			}
+			String resolvedHost = addr.getHostAddress();
+			if (colonIdx > 0) {
+				return resolvedHost + zHost.substring(colonIdx);
+			}
+			return resolvedHost;
 		} catch (java.net.UnknownHostException e) {
 			throw new SQLException("Unknown MySQL host: " + zHost, e);
 		}
@@ -88,10 +93,10 @@ public class MySQLConnect {
 	}
 	
 	public void init() throws SQLException {
-		validateHost(mMySQLHost);
+		String resolvedHost = validateAndResolveHost(mMySQLHost);
 
 		//MYSQL JDBC connection
-		String mysqldb = "jdbc:mysql://"+mMySQLHost+"/"+mDatabase+"?autoReconnect=true";
+		String mysqldb = "jdbc:mysql://"+resolvedHost+"/"+mDatabase+"?autoReconnect=true";
 		
 		if(DEBUG) {
 			MinimaLogger.log("JDBC - "+mysqldb);
