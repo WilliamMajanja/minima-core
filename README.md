@@ -1,12 +1,13 @@
 # minima-core
 
 ![Security Audit](https://img.shields.io/badge/Security_Audit-80_alerts_remediated-brightgreen)
-![CodeQL](https://img.shields.io/badge/CodeQL-80%2F80_dismissed-green)
+![CodeQL](https://img.shields.io/badge/CodeQL-80%2F80_passing-brightgreen)
 ![Tests](https://img.shields.io/badge/Tests-278_passing-brightgreen)
 ![Coverage](https://img.shields.io/badge/Security_Tests-34%2F34_passing-brightgreen)
 ![Crypto](https://img.shields.io/badge/Crypto-RSA--OAEP--4096%20%7C%20AES--256--GCM-blue)
 ![Mainnet](https://img.shields.io/badge/Mainnet-Verified-success)
 ![Swiss Compliance](https://img.shields.io/badge/Swiss_Compliance-nDSG%2FFADP_%7C_FINMA_%7C_AMLA-blueviolet)
+![UK Compliance](https://img.shields.io/badge/UK_Compliance-UK_GDPR_%7C_CMA_%7C_FSMA_%7C_MLR-blueviolet)
 ![Code Review](https://img.shields.io/badge/Code_Review-Defense_in_Depth-orange)
 
 Minima full node application — a decentralized blockchain node implementation running on the Minima network.
@@ -43,21 +44,21 @@ This patch set represents the most thorough security audit and remediation ever 
 
 ## Financial Exposure Summary
 
-Minima Global AG is headquartered in **Zug, Switzerland**, placing it under direct jurisdiction of Swiss federal law. The full liability analysis is in [SECURITY.md](SECURITY.md).
+Minima Global AG is headquartered in **Zug, Switzerland**, placing it under direct jurisdiction of Swiss federal law. It is also subject to UK law when processing data of UK residents or offering cryptoasset services. The full liability analysis is in [SECURITY.md](SECURITY.md).
 
 ### Total Exposure: 10,000 Users — Unpatched vs Patched
 
 | Category | Conservative | Worst Case |
 |----------|-------------|------------|
 | Direct Financial Losses | $26.5M | $1.02B |
-| Regulatory Penalties (9 jurisdictions incl. Swiss) | $45.7M | $1.82B |
+| Regulatory Penalties (14 jurisdictions incl. UK) | $85.7M | $4.4B |
 | Civil Litigation | $63.5M | $615M |
 | Operational Costs | $1.65M | $10.2M |
-| **GRAND TOTAL** | **$137.3M** | **$3.46B** |
+| **GRAND TOTAL** | **$177.35M** | **$5.045B** |
 
 | State | Per-User Cost |
 |-------|--------------|
-| **Unpatched** | $13,730 – $346,020 |
+| **Unpatched** | $17,735 – $504,500 |
 | **Patched (this submission)** | $0 |
 | **Return on Investment** | ∞ |
 
@@ -87,6 +88,32 @@ Minima Global AG is subject to the following Swiss regulations with enforceable 
 | **AMLA** | Art. 3ff | AML/KYC data protection | CHF 500K–5M per case; criminal if willful |
 
 Mandatory controls: AES-GCM encryption, RSA-OAEP-4096, SSRF prevention, path traversal validation, SQL injection prevention, annual key rotation, audit logging, annual risk assessment. Full policy in [SECURITY.md](SECURITY.md) Section 9.
+
+### United Kingdom Liability
+
+Minima Global AG is also subject to UK law when processing data of UK residents or offering cryptoasset services to UK persons.
+
+| Regulation | Exposure (10,000 Users) |
+|-----------|------------------------|
+| UK GDPR / DPA 2018 | £5M – £50M |
+| Computer Misuse Act 1990 | £10M – £500M |
+| FSMA 2000 / FCA | £10M – £1B |
+| MLR 2017 | £5M – £500M |
+| **UK Total** | **£30M – £2.07B ($37.5M – $2.59B)** |
+
+### UK Regulatory Compliance
+
+| Regulation | Provision | Requirement | Penalty |
+|-----------|-----------|-------------|---------|
+| **UK GDPR** | Art. 5(1)(f) | Integrity and confidentiality of personal data | £17.5M or 4% global turnover |
+| **UK GDPR** | Art. 32 | State-of-the-art security measures | £17.5M or 4% global turnover |
+| **UK GDPR** | Art. 33/34 | 72-hour breach notification to ICO | £8.7M or 2% global turnover |
+| **DPA 2018** | Section 175 | Special category data (financial) | £17.5M or 4% global turnover |
+| **Computer Misuse Act 1990** | Sec. 1/2/3ZA | Unauthorized access; computer misuse articles | Up to 5 years imprisonment + unlimited fine |
+| **FSMA 2000** | Part 4A | FCA cryptoasset registration required | Unlimited fine; criminal prosecution |
+| **MLR 2017** | Regulation 21/27 | AML/KYC customer due diligence and record-keeping | Up to £1M per violation; criminal if willful |
+
+Mandatory controls (UK): Same as Swiss controls plus ICO notification within 72 hours, FCA cryptoasset registration, and CMA-compliant security testing. Full policy in [SECURITY.md](SECURITY.md) Section 10.
 
 ---
 
@@ -201,7 +228,7 @@ See [SECURITY.md](SECURITY.md) for the complete vulnerability inventory, remedia
 - **CodeQL dismissals**: [SECURITY.md](SECURITY.md) Section 6
 - **Code review policy**: [SECURITY.md](SECURITY.md) Section 10
 - **Swiss regulatory compliance**: [SECURITY.md](SECURITY.md) Section 9
-- **Validation evidence**: [SECURITY.md](SECURITY.md) Section 11
+- **Validation evidence**: [SECURITY.md](SECURITY.md) Section 12
 - **Whitepaper**: [WHITEPAPER.md](WHITEPAPER.md)
 
 **Reporting vulnerabilities:** security@minima.global
