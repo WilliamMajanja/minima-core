@@ -435,7 +435,7 @@ The financial exposure analysis demonstrates that for a 10,000-user deployment, 
 
 The CodeQL taint tracking limitations identified in this study represent a broader challenge for the security tooling industry: custom validation functions written in application-specific code are fundamentally opaque to static analysis unless explicit model extensions are maintained. We recommend that organizations treat dismissal justifications as living documentation and invest in runtime validation to complement static analysis.
 
-All remediated code, test suites, and policy documentation are available in the Minima Core repository under the commit history beginning at `82c253b`.
+All remediated code, test suites, and policy documentation are available in the Minima Core repository under the commit history beginning at `82c253b`. Full validation evidence, including individual test results and mainnet deployment proof, is documented in SECURITY.md Section 10.
 
 ---
 

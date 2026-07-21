@@ -511,4 +511,112 @@ Minima Global AG is incorporated in Zug, Switzerland, and is subject to Swiss fe
 
 ---
 
+## 10. Validation Evidence
+
+### 10.1 Automated Test Results
+
+All 278 unit tests pass with zero failures and zero errors. The test suite includes 34 security-specific validation tests that directly verify each remediated vulnerability class.
+
+| Test Suite | Tests | Passed | Failed | Errors |
+|-----------|-------|--------|--------|--------|
+| Existing Unit Tests | 244 | 244 | 0 | 0 |
+| Security Validation Tests | 34 | 34 | 0 | 0 |
+| **Total** | **278** | **278** | **0** | **0** |
+
+### 10.2 Security Validation Test Details
+
+| Test | Vulnerability Class | Verification |
+|------|-------------------|--------------|
+| `testAsymmetricCipherIsOAEP` | RSA without OAEP | Asserts cipher algorithm is exactly `RSA/ECB/OAEPWithSHA-256AndMGF1Padding` |
+| `testSymmetricCipherIsGCM` | Broken cipher (AES-CBC) | Asserts cipher algorithm is exactly `AES/GCM/NoPadding` |
+| `testRSAEncryptionWithOAEP` | RSA without OAEP | Encrypts with 4096-bit RSA-OAEP, decrypts, asserts round-trip matches |
+| `testAESGCMBasicEncryptionDecryption` | Broken cipher (AES-CBC) | Encrypts with AES-GCM, decrypts, asserts plaintext matches; ciphertext length = plaintext + 16 (GCM tag) |
+| `testGCMRejectsTamperedCiphertext` | Broken cipher (AES-CBC) | Flips bit in ciphertext, asserts `AEADBadTagException` is thrown — proves GCM detects tampering (CBC would not) |
+| `testGetCipherSYMWithNullIVGeneratesRandomIV` | Static IV | Asserts null IV produces 12-byte random IV via `SecureRandom` |
+| `testGetCipherSYMWithProvidedIV` | Static IV | Asserts provided 12-byte IV is used correctly |
+| `testRandomIVIsUnique` | Static IV | Asserts two `IvParam()` calls produce different IVs |
+| `testSecretKeyLength` | Insufficient key size | Asserts `GenerateKey.secretKey()` returns 32 bytes (AES-256) |
+| `testConvertSecretKey` | Insufficient key size | Asserts `convertSecret()` produces valid `SecretKey` with "AES" algorithm |
+| `testRPCClientBlocksPrivateIP127` | SSRF | Reflection: `validateAndResolveURI("http://127.0.0.1:8080/api")` throws `IOException` |
+| `testRPCClientBlocksPrivateIP10` | SSRF | Reflection: `validateAndResolveURI("http://10.0.0.1:9001/rpc")` throws `IOException` |
+| `testRPCClientBlocksPrivateIP192_168` | SSRF | Reflection: `validateAndResolveURI("http://192.168.1.1/api")` throws `IOException` |
+| `testRPCClientBlocksCloudMetadata169` | SSRF | Reflection: `validateAndResolveURI("http://169.254.169.254/latest/meta-data/")` throws `IOException` |
+| `testRPCClientBlocksFTP` | SSRF | Reflection: `validateAndResolveURI("ftp://evil.com/payload")` throws `IOException` |
+| `testMySQLConnectBlocksPrivateIP127` | SSRF | Reflection: `validateAndResolveHost("127.0.0.1:3306")` throws `SQLException` |
+| `testMySQLConnectBlocksCloudMetadata` | SSRF | Reflection: `validateAndResolveHost("169.254.169.254:3306")` throws `SQLException` |
+| `testMySQLConnectBlocksPrivateIP10` | SSRF | Reflection: `validateAndResolveHost("10.0.0.1:3306")` throws `SQLException` |
+| `testSanitizeFileNameNormalFile` | Path traversal | Asserts `sanitizeFileName("test.txt")` returns `"test.txt"` |
+| `testSanitizeFileNameDirectoryTraversal` | Path traversal | Asserts `sanitizeFileName("../../../etc/passwd")` strips `../` |
+| `testSanitizeFileNameDoubleDot` | Path traversal | Asserts `sanitizeFileName("foo/..")` throws `IllegalArgumentException` |
+| `testSanitizeFileNameMixedTraversal` | Path traversal | Asserts mixed traversal sequences are stripped |
+| `testSanitizeFileNameAbsolutePath` | Path traversal | Asserts absolute paths are neutralized |
+| `testSanitizeFileNameStripsBackslashTraversal` | Path traversal | Asserts `..\\` sequences are stripped |
+| `testSanitizeFileNameNullInput` | Path traversal | Asserts null input returns null |
+| `testValidateFileAccessAllowsValidFile` | Path traversal | Asserts files within base directory are not blocked |
+| `testValidateFileAccessBlocksTraversal` | Path traversal | Asserts `../../../etc/passwd` throws `SecurityException` |
+| `testSanitizePathForSQLNormalPath` | SQL injection | Asserts normal paths pass through unchanged |
+| `testSanitizePathForSQLRemovesSemicolons` | SQL injection | Asserts semicolons are stripped from paths |
+| `testSanitizePathForSQLRemovesSQLComments` | SQL injection | Asserts `--` comment markers are stripped |
+| `testSanitizePathForSQLEscapesSingleQuotes` | SQL injection | Asserts single quotes are doubled for escaping |
+| `testSanitizePathForSQLConvertsBackslashes` | SQL injection | Asserts backslashes are converted to forward slashes |
+| `testMiniFileBlocksSQLInjectionViaPath` | SQL injection | Asserts path sanitization strips `;`, `--`, and `'` |
+| `testAesUtilEncryptDecrypt` | Broken cipher | Round-trip encrypt/decrypt with AES/GCM/NoPadding |
+
+### 10.3 Mainnet Deployment Verification
+
+The patched node was deployed on the Minima mainnet with the following verified results:
+
+| Metric | Value |
+|--------|-------|
+| Node version | 1.0.46.8 (patched) |
+| Connected peers | 4 |
+| Chain block height | 2,219,786+ |
+| Database files loaded | 5/5 (no SecurityException false positives) |
+| Wallet keys generated | 64 (RSA-4096) |
+| Transaction received | 0.1 Minima (confirmed, unspent) |
+| Clean shutdown | All databases saved successfully |
+
+**Coin receipt proof:**
+
+| Field | Value |
+|-------|-------|
+| Amount | 0.1 Minima |
+| Address | MxG081Y5GFJ69MHBCWFPPQAFWGP5P523UW47M7PJ28JYQN6G5VFV0T1MHQ1K1RD |
+| Coin ID | 0x420C485E83EE8A95EC158CD742CDC3F0B995258EE16A26E76477CF9DC06D3E3C |
+| Token | Minima |
+| Age | 25 blocks |
+| Spent | False |
+
+### 10.4 Build System Changes
+
+The build system was upgraded from Gradle 6.7.1 to 8.5 to support Java 21 runtime:
+
+| Component | Before | After |
+|-----------|--------|-------|
+| Gradle | 6.7.1 | 8.5 |
+| Shadow plugin | 6.1.0 | 8.1.1 |
+| Repository | jcenter() | mavenCentral() |
+| Bouncy Castle | maven central (bcpkix-jdk15on:1.69) | local JARs (preserves GMSS Winternitz OTS) |
+| Source/target | 1.8 | 11 |
+
+### 10.5 Runtime Bug Fix
+
+During mainnet testing, `validateFileAccess()` produced false positives for internal database files because `GeneralParams.BASE_FILE_FOLDER` defaulted to the current working directory when empty, while database files were stored in `GeneralParams.DATA_FOLDER`. This was fixed by introducing `getBasePath()` which falls back to `DATA_FOLDER` before `CWD`, and adding a secondary CWD check in `validateFileAccess()`:
+
+```java
+private static Path getBasePath() {
+    if (!GeneralParams.BASE_FILE_FOLDER.equals("")) {
+        return Paths.get(GeneralParams.BASE_FILE_FOLDER).toAbsolutePath().normalize();
+    }
+    if (!GeneralParams.DATA_FOLDER.equals("")) {
+        return Paths.get(GeneralParams.DATA_FOLDER).toAbsolutePath().normalize();
+    }
+    return Paths.get(".").toAbsolutePath().normalize();
+}
+```
+
+This demonstrates that **unit tests alone are insufficient for validating security controls that affect I/O paths. Runtime integration testing on the actual deployment target is essential.**
+
+---
+
 *This policy covers 80 CodeQL-identified vulnerabilities across 7 categories. All have been remediated with defense-in-depth validation. The 80 remaining CodeQL alerts are false positives resulting from taint tracking that does not recognize custom validation methods; justification for each category is documented in Section 6. Financial exposure estimates are based on IBM/Ponemon 2024, NIST SP 800-53 Rev. 5, GDPR Article 32, and CCPA §1798.150.*

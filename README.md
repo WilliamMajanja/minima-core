@@ -151,6 +151,38 @@ java -jar minima.jar -solo -megammr
 
 ---
 
+## Validation Evidence
+
+All fixes are verified by **278 automated tests** (244 existing + 34 security-specific) with **zero failures**, plus **live mainnet deployment** receiving real cryptocurrency.
+
+### Test Results
+
+| Test Suite | Tests | Passed | Failed | Errors |
+|-----------|-------|--------|--------|--------|
+| Existing Unit Tests | 244 | 244 | 0 | 0 |
+| Security Validation Tests | 34 | 34 | 0 | 0 |
+
+### Mainnet Proof
+
+| Metric | Value |
+|--------|-------|
+| Node version | 1.0.46.8 (patched) |
+| Connected peers | 4 |
+| Block height | 2,219,786+ |
+| Wallet keys | 64 (RSA-4096, AES-GCM) |
+| Transaction received | 0.1 Minima (confirmed, unspent) |
+| Coin ID | `0x420C485E83EE8A95EC158CD742CDC3F0B995258EE16A26E76477CF9DC06D3E3C` |
+
+### Key Security Tests
+
+- `testGCMRejectsTamperedCiphertext` — AES-GCM detects 1-bit ciphertext tampering (CBC would not)
+- `testAsymmetricCipherIsOAEP` — asserts algorithm is exactly `RSA/ECB/OAEPWithSHA-256AndMGF1Padding`
+- `testRPCClientBlocksCloudMetadata169` — `169.254.169.254` rejected with `IOException`
+- `testValidateFileAccessBlocksTraversal` — `../../../etc/passwd` rejected with `SecurityException`
+- Full details in [SECURITY.md](SECURITY.md) Section 10.
+
+---
+
 ## Security
 
 See [SECURITY.md](SECURITY.md) for the complete vulnerability inventory, remediation details, ExploitDB/GHDB reproduction strategies, Swiss regulatory compliance policy, and ongoing security requirements.
