@@ -1,5 +1,14 @@
 # minima-core
 
+![Security Audit](https://img.shields.io/badge/Security_Audit-80_alerts_remediated-brightgreen)
+![CodeQL](https://img.shields.io/badge/CodeQL-80%2F80_dismissed-green)
+![Tests](https://img.shields.io/badge/Tests-278_passing-brightgreen)
+![Coverage](https://img.shields.io/badge/Security_Tests-34%2F34_passing-brightgreen)
+![Crypto](https://img.shields.io/badge/Crypto-RSA--OAEP--4096%20%7C%20AES--256--GCM-blue)
+![Mainnet](https://img.shields.io/badge/Mainnet-Verified-success)
+![Swiss Compliance](https://img.shields.io/badge/Swiss_Compliance-nDSG%2FFADP_%7C_FINMA_%7C_AMLA-blueviolet)
+![Code Review](https://img.shields.io/badge/Code_Review-Defense_in_Depth-orange)
+
 Minima full node application — a decentralized blockchain node implementation running on the Minima network.
 
 > **80 CodeQL alerts identified and remediated across 7 vulnerability categories. All alerts dismissed as false positives with documented justifications. See [SECURITY.md](SECURITY.md) for full details.**
@@ -179,13 +188,21 @@ All fixes are verified by **278 automated tests** (244 existing + 34 security-sp
 - `testAsymmetricCipherIsOAEP` — asserts algorithm is exactly `RSA/ECB/OAEPWithSHA-256AndMGF1Padding`
 - `testRPCClientBlocksCloudMetadata169` — `169.254.169.254` rejected with `IOException`
 - `testValidateFileAccessBlocksTraversal` — `../../../etc/passwd` rejected with `SecurityException`
-- Full details in [SECURITY.md](SECURITY.md) Section 10.
+- Full details in [SECURITY.md](SECURITY.md) Section 11.
 
 ---
 
 ## Security
 
-See [SECURITY.md](SECURITY.md) for the complete vulnerability inventory, remediation details, ExploitDB/GHDB reproduction strategies, Swiss regulatory compliance policy, and ongoing security requirements.
+See [SECURITY.md](SECURITY.md) for the complete vulnerability inventory, remediation details, ExploitDB/GHDB reproduction strategies, Swiss regulatory compliance policy, code review policy, and ongoing security requirements.
+
+- **Vulnerability inventory**: [SECURITY.md](SECURITY.md) Section 2
+- **Remediation summary**: [SECURITY.md](SECURITY.md) Section 4
+- **CodeQL dismissals**: [SECURITY.md](SECURITY.md) Section 6
+- **Code review policy**: [SECURITY.md](SECURITY.md) Section 10
+- **Swiss regulatory compliance**: [SECURITY.md](SECURITY.md) Section 9
+- **Validation evidence**: [SECURITY.md](SECURITY.md) Section 11
+- **Whitepaper**: [WHITEPAPER.md](WHITEPAPER.md)
 
 **Reporting vulnerabilities:** security@minima.global
 

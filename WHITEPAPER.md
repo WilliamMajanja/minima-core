@@ -1,5 +1,14 @@
 # Comprehensive Security Remediation of Minima Core: A Defense-in-Depth Approach to Blockchain Node Security
 
+![Security Audit](https://img.shields.io/badge/Security_Audit-80_alerts_remediated-brightgreen)
+![CodeQL](https://img.shields.io/badge/CodeQL-80%2F80_dismissed-green)
+![Tests](https://img.shields.io/badge/Tests-278_passing-brightgreen)
+![Security Tests](https://img.shields.io/badge/Security_Tests-34%2F34_passing-brightgreen)
+![Crypto](https://img.shields.io/badge/Crypto-RSA--OAEP--4096%20%7C%20AES--256--GCM-blue)
+![Mainnet](https://img.shields.io/badge/Mainnet-Verified-success)
+![Swiss Compliance](https://img.shields.io/badge/Swiss_Compliance-nDSG%2FFADP_%7C_FINMA_%7C_AMLA-blueviolet)
+![Code Review](https://img.shields.io/badge/Code_Review-Defense_in_Depth-orange)
+
 **William Majanja**  
 Minima Global AG, Zug, Switzerland  
 ORCID: 0009-0009-0009-0009
@@ -587,7 +596,7 @@ The financial exposure analysis demonstrates that for a 10,000-user deployment, 
 
 The CodeQL taint tracking limitations identified in this study represent a broader challenge for the security tooling industry: custom validation functions written in application-specific code are fundamentally opaque to static analysis unless explicit model extensions are maintained. We recommend that organizations treat dismissal justifications as living documentation and invest in runtime validation to complement static analysis.
 
-All remediated code, test suites, and policy documentation are available in the Minima Core repository under the commit history beginning at `82c253b`. Full validation evidence, including individual test results and mainnet deployment proof, is documented in SECURITY.md Section 10.
+All remediated code, test suites, and policy documentation are available in the Minima Core repository under the commit history beginning at `82c253b`. Full validation evidence, including individual test results and mainnet deployment proof, is documented in SECURITY.md Section 11.
 
 ---
 

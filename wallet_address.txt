@@ -1,0 +1,12 @@
+Minima Wallet Address (Ready to Receive Coins)
+================================================
+
+Address: MxG081Y5GFJ69MHBCWFPPQAFWGP5P523UW47M7PJ28JYQN6G5VFV0T1MHQ1K1RD
+
+Network Status:
+- Connected to mainnet (4 peers)
+- Chain sync in progress (block 2219786)
+- RPC enabled on port 9005 (SSL)
+- Version: 1.0.46.8
+
+Send Minima to the address above to deposit coins.
