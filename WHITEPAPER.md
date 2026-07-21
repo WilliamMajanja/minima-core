@@ -9,6 +9,7 @@
 ![Swiss Compliance](https://img.shields.io/badge/Swiss_Compliance-nDSG%2FFADP_%7C_FINMA_%7C_AMLA-blueviolet)
 ![UK Compliance](https://img.shields.io/badge/UK_Compliance-UK_GDPR_%7C_CMA_%7C_FSMA_%7C_MLR-blueviolet)
 ![Code Review](https://img.shields.io/badge/Code_Review-Defense_in_Depth-orange)
+![License](https://img.shields.io/badge/License-Apache%202.0-blue)
 
 **William Majanja**  
 Minima Global AG, Zug, Switzerland  
