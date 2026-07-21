@@ -66,6 +66,7 @@ public class hash extends Command {
 			
 			isfile	 = true;
 			datafile = MiniFile.createBaseFile(getParam("file"));
+			MiniFile.validateFileAccess(datafile);
 			if(!datafile.exists()) {
 				throw new CommandException("File doesn't exist : "+datafile.getAbsolutePath());
 			}

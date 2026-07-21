@@ -92,6 +92,7 @@ public class restoresync extends Command {
 		
 		//Does it exist..
 		File restorefile = MiniFile.createBaseFile(file);
+		MiniFile.validateFileAccess(restorefile);
 		if(!restorefile.exists()) {
 			throw new Exception("Restore file doesn't exist : "+restorefile.getAbsolutePath());
 		}

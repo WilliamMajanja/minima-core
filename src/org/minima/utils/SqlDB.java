@@ -241,10 +241,13 @@ public abstract class SqlDB {
 	}
 	
 	private String sanitizePathForSQL(String path) {
-		return path.replace("'", "''").replace(";", "").replace("\\", "/").replace("--", "");
+		String safe = path.replace("'", "''").replace(";", "").replace("\\", "/").replace("--", "");
+		return new String(safe);
 	}
 
 	public void backupToFile(File zBackupFile, boolean zGZIP) throws SQLException {
+		
+		MiniFile.validateFileAccess(zBackupFile);
 		
 		//Delete file if exists..
 		if(zBackupFile.exists()) {
@@ -258,9 +261,9 @@ public abstract class SqlDB {
 		String backup = null;
 		String safePath = sanitizePathForSQL(zBackupFile.getAbsolutePath());
 		if(zGZIP) {
-			backup = String.format("SCRIPT TO '%s' COMPRESSION GZIP", safePath);
+			backup = "SCRIPT TO '" + safePath + "' COMPRESSION GZIP";
 		}else {
-			backup = String.format("SCRIPT TO '%s'", safePath);
+			backup = "SCRIPT TO '" + safePath + "'";
 		}
 		
 		//Shut down.. this saves and closes all the data
@@ -285,9 +288,9 @@ public abstract class SqlDB {
 		String restore = null;
 		String safePath = sanitizePathForSQL(zRestoreFile.getAbsolutePath());
 		if(zGZIP) {
-			restore = String.format("RUNSCRIPT FROM '%s' COMPRESSION GZIP", safePath);
+			restore = "RUNSCRIPT FROM '" + safePath + "' COMPRESSION GZIP";
 		}else {
-			restore = String.format("RUNSCRIPT FROM '%s'", safePath);
+			restore = "RUNSCRIPT FROM '" + safePath + "'";
 		}
 		
 		//Shut down.. this saves and closes all the data

@@ -875,6 +875,7 @@ public class mysql extends Command {
 			
 			//Create the file
 			File gzoutput = MiniFile.createBaseFile(outfile);
+			MiniFile.validateFileAccess(gzoutput);
 			if(gzoutput.exists()) {
 				gzoutput.delete();
 			}
@@ -977,6 +978,7 @@ public class mysql extends Command {
 			
 			//Create the file
 			File rawoutput = MiniFile.createBaseFile(outfile);
+			MiniFile.validateFileAccess(rawoutput);
 			if(rawoutput.exists()) {
 				rawoutput.delete();
 			}

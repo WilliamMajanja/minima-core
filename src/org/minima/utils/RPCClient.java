@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
 import java.util.Base64;
@@ -50,6 +52,20 @@ public class RPCClient {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
+	private static HttpURLConnection openSafeConnection(String zUrl) throws IOException {
+		String safeUrl = validateAndResolveURL(zUrl);
+		URL url = new URL(safeUrl);
+		return (HttpURLConnection) url.openConnection();
+	}
+	
+	@SuppressWarnings("deprecation")
+	private static HttpsURLConnection openSafeHTTPSConnection(String zUrl) throws IOException {
+		String safeUrl = validateAndResolveURL(zUrl);
+		URL url = new URL(safeUrl);
+		return (HttpsURLConnection) url.openConnection();
+	}
+	
 	public static String sendGET(String zHost) throws IOException {
 		if(zHost.startsWith("https")) {
 			return sendGETHTTPS(zHost);
@@ -59,12 +75,8 @@ public class RPCClient {
 	}
 	
 	public static String sendGETBasicAuth(String zHost, String zUser, String zPassword) throws IOException {
-		String resolvedUrl = validateAndResolveURL(zHost);
-		//Create the URL
-		URL obj = new URL(resolvedUrl);
-		
 		//Open her up
-		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+		HttpURLConnection con = openSafeConnection(zHost);
 		con.setConnectTimeout(10000);
 		con.setRequestMethod("GET");
 		con.setRequestProperty("User-Agent", USER_AGENT);
@@ -101,12 +113,8 @@ public class RPCClient {
 	}
 	
 	public static String sendGETHTTPS(String zHost) throws IOException {
-		String resolvedUrl = validateAndResolveURL(zHost);
-		//Create the URL
-		URL obj = new URL(resolvedUrl);
-		
 		//Open her up
-		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+		HttpsURLConnection con = openSafeHTTPSConnection(zHost);
 		con.setConnectTimeout(10000);
 		con.setRequestMethod("GET");
 		con.setRequestProperty("User-Agent", USER_AGENT);
@@ -140,12 +148,8 @@ public class RPCClient {
 	}
 	
 	public static String sendGETBasicAuthSSL(String zHost, String zUser, String zPassword, SSLContext zSSLContext) throws IOException {
-		String resolvedUrl = validateAndResolveURL(zHost);
-		//Create the URL
-		URL obj = new URL(resolvedUrl);
-		
 		//Open her up
-		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+		HttpsURLConnection con = openSafeHTTPSConnection(zHost);
 		con.setConnectTimeout(10000);
 		con.setRequestMethod("GET");
 		con.setRequestProperty("User-Agent", USER_AGENT);
@@ -183,12 +187,8 @@ public class RPCClient {
 	}
 	
 	public static String sendPUT(String zHost) throws IOException {
-		String resolvedUrl = validateAndResolveURL(zHost);
-		//Create the URL
-		URL obj = new URL(resolvedUrl);
-		
 		//Open her up
-		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+		HttpURLConnection con = openSafeConnection(zHost);
 		con.setConnectTimeout(10000);
 		con.setRequestMethod("PUT");
 		con.setRequestProperty("User-Agent", USER_AGENT);
@@ -226,9 +226,7 @@ public class RPCClient {
 	}
 	
 	public static String sendPOST(String zHost, String zParams, String zType) throws IOException {
-		String resolvedUrl = validateAndResolveURL(zHost);
-		URL obj = new URL(resolvedUrl);
-		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+		HttpURLConnection con = openSafeConnection(zHost);
 		con.setConnectTimeout(10000);
 		con.setInstanceFollowRedirects(true);
 		con.setRequestMethod("POST");
@@ -267,9 +265,7 @@ public class RPCClient {
 	}
 	
 	public static String sendPOSTHTTPS(String zHost, String zParams, String zType) throws IOException {
-		String resolvedUrl = validateAndResolveURL(zHost);
-		URL obj = new URL(resolvedUrl);
-		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+		HttpsURLConnection con = openSafeHTTPSConnection(zHost);
 		con.setConnectTimeout(10000);
 		con.setInstanceFollowRedirects(true);
 		con.setRequestMethod("POST");
@@ -311,19 +307,10 @@ public class RPCClient {
 	 * Send GET request with an AUTH token
 	 */
 	public static String sendGETAuth(String zHost, String zAuthToken) throws IOException {
-		String resolvedUrl = validateAndResolveURL(zHost);
-		
-		//Create the URL
-		URL obj = new URL(resolvedUrl);
-		
-		//MinimaLogger.log("GETAUTH : "+zHost+" "+zAuthToken);
-		
 		//Open her up
-		HttpURLConnection con = null;
+		HttpURLConnection con = openSafeConnection(zHost);
 		if(zHost.startsWith("https")) {
-			con = (HttpsURLConnection) obj.openConnection();
-		}else {
-			con = (HttpURLConnection) obj.openConnection();
+			con = openSafeHTTPSConnection(zHost);
 		}
 		
 		//Set the Connection details

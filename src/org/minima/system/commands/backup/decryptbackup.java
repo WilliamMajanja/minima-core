@@ -65,6 +65,7 @@ public class decryptbackup extends Command {
 		
 		//Does it exist..
 		File restorefile = MiniFile.createBaseFile(file);
+		MiniFile.validateFileAccess(restorefile);
 		if(!restorefile.exists()) {
 			throw new Exception("Restore file doesn't exist : "+restorefile.getAbsolutePath());
 		}
@@ -75,6 +76,7 @@ public class decryptbackup extends Command {
 			outfile = "decrypted-"+restorefile.getName();
 		}
 		File outputfile = MiniFile.createBaseFile(outfile);
+		MiniFile.validateFileAccess(outputfile);
 		//MinimaLogger.log("Output : "+outputfile.getAbsolutePath());
 		if(outputfile.exists()) {
 			outputfile.delete();

@@ -125,6 +125,7 @@ public class backup extends Command {
 		
 		//Create the file
 		File backupfile = MiniFile.createBaseFile(file);
+		MiniFile.validateFileAccess(backupfile);
 		
 		if(debug) {
 			MinimaLogger.log("Backup file : "+backupfile.getAbsolutePath());

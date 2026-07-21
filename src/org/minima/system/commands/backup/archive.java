@@ -596,6 +596,7 @@ public class archive extends Command {
 			
 			//Create the file
 			File gzoutput = MiniFile.createBaseFile(file);
+			MiniFile.validateFileAccess(gzoutput);
 			if(gzoutput.exists()) {
 				gzoutput.delete();
 			}
@@ -627,6 +628,7 @@ public class archive extends Command {
 			
 			//Create the file
 			File rawoutput = MiniFile.createBaseFile(file);
+			MiniFile.validateFileAccess(rawoutput);
 			if(rawoutput.exists()) {
 				rawoutput.delete();
 			}
@@ -638,6 +640,7 @@ public class archive extends Command {
 			}
 			
 			//Create output streams..
+			MiniFile.validateFileAccess(rawoutput);
 			FileOutputStream fix 		= new FileOutputStream(rawoutput);
 			BufferedOutputStream bos 	= new BufferedOutputStream(fix, 65536);
 			GZIPOutputStream gout 		= new GZIPOutputStream(bos, 65536);
@@ -776,6 +779,7 @@ public class archive extends Command {
 			
 			//Does it exist..
 			File restorefile = MiniFile.createBaseFile(file);
+			MiniFile.validateFileAccess(restorefile);
 			if(!restorefile.exists()) {
 				throw new Exception("Restore file doesn't exist : "+restorefile.getAbsolutePath());
 			}
@@ -855,6 +859,7 @@ public class archive extends Command {
 			
 			//Does it exist..
 			File restorefile = MiniFile.createBaseFile(file);
+			MiniFile.validateFileAccess(restorefile);
 			if(!restorefile.exists()) {
 				throw new Exception("Restore file doesn't exist : "+restorefile.getAbsolutePath());
 			}
@@ -986,6 +991,7 @@ public class archive extends Command {
 			
 			//Does it exist..
 			File restorefile = MiniFile.createBaseFile(file);
+			MiniFile.validateFileAccess(restorefile);
 			if(!restorefile.exists()) {
 				throw new Exception("Restore file doesn't exist : "+restorefile.getAbsolutePath());
 			}
@@ -1070,6 +1076,7 @@ public class archive extends Command {
 			//Create a temp name
 			String infile 	= getParam("file");
 			File fileinfile = MiniFile.createBaseFile(infile);
+			MiniFile.validateFileAccess(fileinfile);
 			
 			RawArchiveInput rawin = new RawArchiveInput(fileinfile);
 			rawin.connect();
@@ -1160,6 +1167,7 @@ public class archive extends Command {
 			if(!file.equals("")) {
 				//Does it exist..
 				File restorefile = MiniFile.createBaseFile(file);
+				MiniFile.validateFileAccess(restorefile);
 				if(!restorefile.exists()) {
 					throw new Exception("Restore file doesn't exist : "+restorefile.getAbsolutePath());
 				}

@@ -68,6 +68,7 @@ public class txnexport extends Command {
 			
 			//Create the file
 			File output = MiniFile.createBaseFile(file);
+			MiniFile.validateFileAccess(output);
 			if(output.exists()) {
 				output.delete();
 			}

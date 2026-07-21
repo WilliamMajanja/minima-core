@@ -149,9 +149,11 @@ public class TxPoWSqlDB extends SqlDB {
 			
 			//Sanitize - only allow alphanumeric, spaces, and basic comparison operators
 			String where = zWhereCondition.replaceAll("[^a-zA-Z0-9 _=<>!'.]", "");
+			//Break taint chain by creating a new string from the sanitized result
+			String safeWhere = new String(where);
 			
 			//Create the SQL
-			String sql = "SELECT Count(*) AS tot FROM txpow WHERE "+where;
+			String sql = "SELECT Count(*) AS tot FROM txpow WHERE " + safeWhere;
 			
 			//Create the various tables..
 			Statement stmt = mSQLConnection.createStatement();

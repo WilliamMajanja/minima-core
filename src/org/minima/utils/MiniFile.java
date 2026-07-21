@@ -34,37 +34,50 @@ public class MiniFile {
 		if (name.isEmpty() || name.equals(".") || name.equals("..")) {
 			throw new IllegalArgumentException("Invalid file name: " + zFilename);
 		}
-		try {
-			String canonicalPath = file.getCanonicalPath();
-			String base = GeneralParams.BASE_FILE_FOLDER.equals("") ? new File(".").getCanonicalPath() : new File(GeneralParams.BASE_FILE_FOLDER).getCanonicalPath();
-			if (!canonicalPath.startsWith(base + File.separator) && !canonicalPath.equals(base)) {
-				throw new IllegalArgumentException("Path traversal detected: " + zFilename);
-			}
-		} catch (java.io.IOException e) {
-			throw new IllegalArgumentException("Invalid file path: " + zFilename, e);
-		}
 		return sanitized;
 	}
 	
 	public static File createBaseFile(String zFilename) {
-		zFilename = sanitizeFileName(zFilename);
+		String sanitized = sanitizeFileName(zFilename);
+		if (sanitized == null) {
+			throw new IllegalArgumentException("Filename cannot be null");
+		}
 		
-		File retfile = null; 
+		String basePath;
+		if (GeneralParams.BASE_FILE_FOLDER.equals("")) {
+			basePath = new File(".").getAbsolutePath();
+		} else {
+			basePath = GeneralParams.BASE_FILE_FOLDER;
+		}
 		
-		if(GeneralParams.BASE_FILE_FOLDER.equals("")) {
-			retfile = new File(zFilename);
-		}else {
-			retfile = new File(GeneralParams.BASE_FILE_FOLDER, zFilename);
+		File baseDir = new File(basePath);
+		File retfile = new File(baseDir, sanitized);
+		
+		try {
+			String canonicalBase = baseDir.getCanonicalPath();
+			String canonicalFile = retfile.getCanonicalPath();
+			if (!canonicalFile.startsWith(canonicalBase + File.separator) && !canonicalFile.equals(canonicalBase)) {
+				throw new SecurityException("Path traversal detected: " + zFilename);
+			}
+		} catch (java.io.IOException e) {
+			throw new SecurityException("Invalid file path: " + zFilename, e);
+		}
+		
+		File canonicalFile;
+		try {
+			canonicalFile = retfile.getCanonicalFile();
+		} catch (java.io.IOException e) {
+			throw new SecurityException("Invalid file path: " + zFilename, e);
 		}
 		
 		//Make sure the parent exist..
-		String parent = retfile.getParent();
+		String parent = canonicalFile.getParent();
 		if(parent!=null) {
 			File pp = new File(parent);
 			pp.mkdirs();
 		}
 		
-		return retfile;
+		return canonicalFile;
 	}
 	
 	public static void validateFileAccess(File zFile) throws SecurityException {
@@ -107,6 +120,7 @@ public class MiniFile {
 		}
 		
 		//Write it out..
+		validateFileAccess(zFile);
 		FileOutputStream fos = new FileOutputStream(zFile, zAppend);
 		DataOutputStream fdos = new DataOutputStream(fos);
 		
@@ -150,6 +164,7 @@ public class MiniFile {
     	long size  = zFile.length();
     	byte[] ret = new byte[(int) size];
     	
+		validateFileAccess(zFile);
 		FileInputStream fis     = new FileInputStream(zFile);
 		BufferedInputStream bis = new BufferedInputStream(fis);
 		
@@ -318,6 +333,8 @@ public class MiniFile {
 	}
 	
 	public static void copyFile(File zOrig, File zCopy) throws IOException {
+		validateFileAccess(zOrig);
+		validateFileAccess(zCopy);
 		//Check file exists
 		if(!zOrig.exists()){
 			MinimaLogger.log("Trying to copy file that does not exist "+zOrig.getAbsolutePath());
@@ -554,6 +571,8 @@ public class MiniFile {
 	
 	public static void decompressGzipFile(File gzipFile, File newFile) {
         try {
+            validateFileAccess(gzipFile);
+            validateFileAccess(newFile);
             FileInputStream fis 	= new FileInputStream(gzipFile);
             GZIPInputStream gis 	= new GZIPInputStream(fis);
             FileOutputStream fos 	= new FileOutputStream(newFile);
@@ -573,6 +592,8 @@ public class MiniFile {
 
 	public static void compressGzipFile(File file, File gzipFile) {
         try {
+            validateFileAccess(file);
+            validateFileAccess(gzipFile);
             FileInputStream fis 	= new FileInputStream(file);
             FileOutputStream fos 	= new FileOutputStream(gzipFile);
             GZIPOutputStream gzipOS = new GZIPOutputStream(fos);

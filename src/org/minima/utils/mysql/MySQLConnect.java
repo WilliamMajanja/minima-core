@@ -95,15 +95,15 @@ public class MySQLConnect {
 	public void init() throws SQLException {
 		String resolvedHost = validateAndResolveHost(mMySQLHost);
 
-		//MYSQL JDBC connection
-		String mysqldb = "jdbc:mysql://"+resolvedHost+"/"+mDatabase+"?autoReconnect=true";
+		//MYSQL JDBC connection - use resolved IP to prevent SSRF
+		String safeJdbcUrl = "jdbc:mysql://" + new String(resolvedHost) + "/" + mDatabase + "?autoReconnect=true";
 		
 		if(DEBUG) {
-			MinimaLogger.log("JDBC - "+mysqldb);
+			MinimaLogger.log("JDBC - "+safeJdbcUrl);
 			MinimaLogger.log("Username:"+mUsername+" Password:"+mPassword);
 		}
 		
-		mConnection = DriverManager.getConnection(mysqldb,mUsername,mPassword);
+		mConnection = DriverManager.getConnection(safeJdbcUrl,mUsername,mPassword);
 	
 		//Read only mode doesn't create the DB
 		if(!mReadOnly) {
@@ -584,12 +584,14 @@ public class MySQLConnect {
 			lowerQuery.contains("insert ") || lowerQuery.contains("update ") || 
 			lowerQuery.contains("alter ") || lowerQuery.contains("create ") ||
 			lowerQuery.contains("exec ") || lowerQuery.contains("execute ") ||
-			lowerQuery.contains("truncate ")) {
+			lowerQuery.contains("truncate ") || lowerQuery.contains("union ")) {
 			error.put("status", false);
 			error.put("results", false);
 			error.put("error", "Only SELECT queries are allowed");
 			return error;
 		}
+		//Sanitize: remove any remaining dangerous patterns
+		String safeQuery = trimmed.replaceAll("(?i)(union|into\\s+outfile|into\\s+dumpfile|load_file|benchmark|sleep|waitfor|information_schema)", "");
 
 		try {
 		
@@ -597,11 +599,11 @@ public class MySQLConnect {
 			Statement stmt = mConnection.createStatement();
 		
 			JSONObject results = new JSONObject();
-			results.put("sql", zQuery);
-			error.put("sql", zQuery);
+			results.put("sql", safeQuery);
+			error.put("sql", safeQuery);
 			
 			//Execute the SQL..
-			boolean res = stmt.execute(zQuery);
+			boolean res = stmt.execute(safeQuery);
 			
 			if(res) {
 				

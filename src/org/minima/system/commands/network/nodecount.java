@@ -40,6 +40,7 @@ public class nodecount extends Command {
 			saveCSV = false;
 		} else {
 			File csvFile = MiniFile.createBaseFile(file);
+			MiniFile.validateFileAccess(csvFile);
 			writer = new PrintWriter(csvFile);
 		}
 

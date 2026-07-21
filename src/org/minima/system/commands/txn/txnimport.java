@@ -59,6 +59,7 @@ public class txnimport extends Command {
 		if(existsParam("file")) {
 			String file = getParam("file");
 			File ff = MiniFile.createBaseFile(file);
+			MiniFile.validateFileAccess(ff);
 			if(!ff.exists()) {
 				throw new CommandException("File does not exist : "+ff.getAbsolutePath());
 			}

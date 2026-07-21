@@ -108,6 +108,7 @@ public class megammr extends Command {
 			
 			//Create the file
 			File backupfile = MiniFile.createBaseFile(file);
+			MiniFile.validateFileAccess(backupfile);
 			
 			//get the MMR and IBD..
 			if(backupfile.exists()) {
@@ -177,6 +178,7 @@ public class megammr extends Command {
 			
 			//Does it exist..
 			File restorefile = MiniFile.createBaseFile(file);
+			MiniFile.validateFileAccess(restorefile);
 			if(!restorefile.exists()) {
 				throw new CommandException("Restore file doesn't exist : "+restorefile.getAbsolutePath());
 			}
@@ -276,6 +278,7 @@ public class megammr extends Command {
 			
 			//Does it exist..
 			File restorefile = MiniFile.createBaseFile(file);
+			MiniFile.validateFileAccess(restorefile);
 			if(!restorefile.exists()) {
 				throw new CommandException("MegaMMR file doesn't exist : "+restorefile.getAbsolutePath());
 			}
