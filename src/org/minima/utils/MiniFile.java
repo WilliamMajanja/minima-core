@@ -43,12 +43,7 @@ public class MiniFile {
 			throw new IllegalArgumentException("Filename cannot be null");
 		}
 		
-		Path basePath;
-		if (GeneralParams.BASE_FILE_FOLDER.equals("")) {
-			basePath = Paths.get(".").toAbsolutePath().normalize();
-		} else {
-			basePath = Paths.get(GeneralParams.BASE_FILE_FOLDER).toAbsolutePath().normalize();
-		}
+		Path basePath = getBasePath();
 		
 		Path resolvedPath = basePath.resolve(sanitized).normalize();
 		
@@ -68,18 +63,29 @@ public class MiniFile {
 		return retfile;
 	}
 	
+	private static Path getBasePath() {
+		if (!GeneralParams.BASE_FILE_FOLDER.equals("")) {
+			return Paths.get(GeneralParams.BASE_FILE_FOLDER).toAbsolutePath().normalize();
+		}
+		if (!GeneralParams.DATA_FOLDER.equals("")) {
+			return Paths.get(GeneralParams.DATA_FOLDER).toAbsolutePath().normalize();
+		}
+		return Paths.get(".").toAbsolutePath().normalize();
+	}
+
 	public static void validateFileAccess(File zFile) throws SecurityException {
 		if (zFile == null) {
 			throw new SecurityException("File is null");
 		}
-		Path basePath;
-		if (GeneralParams.BASE_FILE_FOLDER.equals("")) {
-			basePath = Paths.get(".").toAbsolutePath().normalize();
-		} else {
-			basePath = Paths.get(GeneralParams.BASE_FILE_FOLDER).toAbsolutePath().normalize();
-		}
+		Path basePath = getBasePath();
 		Path filePath = zFile.toPath().toAbsolutePath().normalize();
 		if (!filePath.startsWith(basePath)) {
+			if (GeneralParams.BASE_FILE_FOLDER.equals("")) {
+				Path cwdPath = Paths.get(".").toAbsolutePath().normalize();
+				if (filePath.startsWith(cwdPath)) {
+					return;
+				}
+			}
 			throw new SecurityException("Path traversal detected: " + zFile.getAbsolutePath());
 		}
 	}
