@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.URI;
 import java.net.URL;
 import java.util.Base64;
 
@@ -18,6 +20,26 @@ public class RPCClient {
 	
 	public static String USER_AGENT = "Minima/1.0";
 	
+	private static void validateURL(String zUrl) throws IOException {
+		try {
+			URI uri = new URI(zUrl);
+			String scheme = uri.getScheme();
+			if (scheme != null && !scheme.equals("http") && !scheme.equals("https")) {
+				throw new IOException("Invalid URL scheme: only http and https are allowed");
+			}
+			String host = uri.getHost();
+			if (host == null || host.isEmpty()) {
+				throw new IOException("Invalid URL: missing host");
+			}
+			InetAddress addr = InetAddress.getByName(host);
+			if (addr.isLoopbackAddress() || addr.isLinkLocalAddress() || addr.isSiteLocalAddress()) {
+				throw new IOException("Invalid URL: private/reserved addresses not allowed - " + host);
+			}
+		} catch (java.net.URISyntaxException e) {
+			throw new IOException("Invalid URL: " + zUrl, e);
+		}
+	}
+	
 	public static String sendGET(String zHost) throws IOException {
 		if(zHost.startsWith("https")) {
 			return sendGETHTTPS(zHost);
@@ -27,6 +49,7 @@ public class RPCClient {
 	}
 	
 	public static String sendGETBasicAuth(String zHost, String zUser, String zPassword) throws IOException {
+		validateURL(zHost);
 		//Create the URL
 		URL obj = new URL(zHost);
 		
@@ -68,6 +91,7 @@ public class RPCClient {
 	}
 	
 	public static String sendGETHTTPS(String zHost) throws IOException {
+		validateURL(zHost);
 		//Create the URL
 		URL obj = new URL(zHost);
 		
@@ -106,6 +130,7 @@ public class RPCClient {
 	}
 	
 	public static String sendGETBasicAuthSSL(String zHost, String zUser, String zPassword, SSLContext zSSLContext) throws IOException {
+		validateURL(zHost);
 		//Create the URL
 		URL obj = new URL(zHost);
 		
@@ -148,6 +173,7 @@ public class RPCClient {
 	}
 	
 	public static String sendPUT(String zHost) throws IOException {
+		validateURL(zHost);
 		//Create the URL
 		URL obj = new URL(zHost);
 		
@@ -190,6 +216,7 @@ public class RPCClient {
 	}
 	
 	public static String sendPOST(String zHost, String zParams, String zType) throws IOException {
+		validateURL(zHost);
 		URL obj = new URL(zHost);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 		con.setConnectTimeout(10000);
@@ -230,6 +257,7 @@ public class RPCClient {
 	}
 	
 	public static String sendPOSTHTTPS(String zHost, String zParams, String zType) throws IOException {
+		validateURL(zHost);
 		URL obj = new URL(zHost);
 		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 		con.setConnectTimeout(10000);
@@ -273,6 +301,7 @@ public class RPCClient {
 	 * Send GET request with an AUTH token
 	 */
 	public static String sendGETAuth(String zHost, String zAuthToken) throws IOException {
+		validateURL(zHost);
 		
 		//Create the URL
 		URL obj = new URL(zHost);

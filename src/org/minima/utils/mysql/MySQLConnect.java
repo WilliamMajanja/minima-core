@@ -1,5 +1,7 @@
 package org.minima.utils.mysql;
 
+import java.net.InetAddress;
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -61,6 +63,22 @@ public class MySQLConnect {
 		this(zHost, zDatabase, zUsername, zPassword, false);
 	}
 	
+	private static void validateHost(String zHost) throws SQLException {
+		try {
+			String hostPart = zHost;
+			int colonIdx = zHost.indexOf(':');
+			if (colonIdx > 0) {
+				hostPart = zHost.substring(0, colonIdx);
+			}
+			InetAddress addr = InetAddress.getByName(hostPart);
+			if (addr.isLoopbackAddress() || addr.isLinkLocalAddress() || addr.isSiteLocalAddress()) {
+				throw new SQLException("Invalid MySQL host: private/reserved addresses not allowed - " + hostPart);
+			}
+		} catch (java.net.UnknownHostException e) {
+			throw new SQLException("Unknown MySQL host: " + zHost, e);
+		}
+	}
+
 	public MySQLConnect(String zHost, String zDatabase, String zUsername, String zPassword, boolean zReadOnly) {
 		mMySQLHost 	= zHost;
 		mDatabase	= zDatabase;
@@ -70,6 +88,8 @@ public class MySQLConnect {
 	}
 	
 	public void init() throws SQLException {
+		validateHost(mMySQLHost);
+
 		//MYSQL JDBC connection
 		String mysqldb = "jdbc:mysql://"+mMySQLHost+"/"+mDatabase+"?autoReconnect=true";
 		
@@ -544,6 +564,28 @@ public class MySQLConnect {
 	public synchronized JSONObject searchCoins(String zQuery,boolean zHideToken) {
 		JSONObject error = new JSONObject();
 		
+		//Only allow SELECT queries - prevent SQL injection
+		String trimmed = zQuery.trim();
+		if (!trimmed.toLowerCase().startsWith("select")) {
+			error.put("status", false);
+			error.put("results", false);
+			error.put("error", "Only SELECT queries are allowed");
+			return error;
+		}
+		//Block dangerous keywords that could modify data
+		String lowerQuery = trimmed.toLowerCase();
+		if (lowerQuery.contains(";") || lowerQuery.contains("--") || 
+			lowerQuery.contains("drop ") || lowerQuery.contains("delete ") || 
+			lowerQuery.contains("insert ") || lowerQuery.contains("update ") || 
+			lowerQuery.contains("alter ") || lowerQuery.contains("create ") ||
+			lowerQuery.contains("exec ") || lowerQuery.contains("execute ") ||
+			lowerQuery.contains("truncate ")) {
+			error.put("status", false);
+			error.put("results", false);
+			error.put("error", "Only SELECT queries are allowed");
+			return error;
+		}
+
 		try {
 		
 			//Create the various tables..

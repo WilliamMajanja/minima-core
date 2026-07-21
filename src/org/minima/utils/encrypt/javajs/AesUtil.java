@@ -14,6 +14,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -22,6 +23,10 @@ import org.bouncycastle.util.encoders.DecoderException;
 import org.minima.objects.base.MiniData;
 
 public class AesUtil {
+    private static final String CIPHER_ALGORITHM = "AES/GCM/NoPadding";
+    private static final int GCM_IV_LENGTH = 12;
+    private static final int GCM_TAG_LENGTH = 128;
+
     private final int keySize;
     private final int iterationCount;
     private final Cipher cipher;
@@ -30,7 +35,7 @@ public class AesUtil {
         this.keySize = keySize;
         this.iterationCount = iterationCount;
         try {
-            cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher = Cipher.getInstance(CIPHER_ALGORITHM);
         }
         catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw fail(e);
@@ -40,7 +45,13 @@ public class AesUtil {
     public String decrypt(String salt, String iv, String passphrase, String ciphertext) {
         try {
             SecretKey key = generateKey(salt, passphrase);
-            byte[] decrypted = doFinal(Cipher.DECRYPT_MODE, key, iv, base64Decode(ciphertext));
+            byte[] ivBytes = hex(iv);
+            if (ivBytes.length != GCM_IV_LENGTH) {
+                byte[] paddedIv = new byte[GCM_IV_LENGTH];
+                System.arraycopy(ivBytes, 0, paddedIv, 0, Math.min(ivBytes.length, GCM_IV_LENGTH));
+                ivBytes = paddedIv;
+            }
+            byte[] decrypted = doFinal(Cipher.DECRYPT_MODE, key, ivBytes, base64Decode(ciphertext));
             return new String(decrypted, "UTF-8");
         }
         catch (UnsupportedEncodingException e) {
@@ -53,7 +64,13 @@ public class AesUtil {
     public String encrypt(String salt, String iv, String passphrase, String plaintext) {
         try {
             SecretKey key = generateKey(salt, passphrase);
-            byte[] decrypted = doFinal(Cipher.ENCRYPT_MODE, key, iv, plaintext.getBytes());
+            byte[] ivBytes = hex(iv);
+            if (ivBytes.length != GCM_IV_LENGTH) {
+                byte[] paddedIv = new byte[GCM_IV_LENGTH];
+                System.arraycopy(ivBytes, 0, paddedIv, 0, Math.min(ivBytes.length, GCM_IV_LENGTH));
+                ivBytes = paddedIv;
+            }
+            byte[] decrypted = doFinal(Cipher.ENCRYPT_MODE, key, ivBytes, plaintext.getBytes());
             return base64Encode(decrypted);
         
         }catch (Exception e){
@@ -61,15 +78,12 @@ public class AesUtil {
         }
     }
     
-    private byte[] doFinal(int encryptMode, SecretKey key, String iv, byte[] bytes) {
+    private byte[] doFinal(int encryptMode, SecretKey key, byte[] ivBytes, byte[] bytes) {
         try {
-            cipher.init(encryptMode, key, new IvParameterSpec(hex(iv)));
+            cipher.init(encryptMode, key, new GCMParameterSpec(GCM_TAG_LENGTH, ivBytes));
             return cipher.doFinal(bytes);
         }
-        catch (InvalidKeyException
-                | InvalidAlgorithmParameterException
-                | IllegalBlockSizeException
-                | BadPaddingException e) {
+        catch (Exception e) {
             return null;
         }
     }

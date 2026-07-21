@@ -24,26 +24,38 @@ import org.minima.utils.json.JSONObject;
 
 public class MiniFile {
 	
+	public static String sanitizeFileName(String zFilename) {
+		if (zFilename == null) {
+			return null;
+		}
+		String sanitized = zFilename.replace("../", "").replace("..\\", "");
+		File file = new File(sanitized);
+		String name = file.getName();
+		if (name.isEmpty() || name.equals(".") || name.equals("..")) {
+			throw new IllegalArgumentException("Invalid file name: " + zFilename);
+		}
+		return sanitized;
+	}
 	
 	public static File createBaseFile(String zFilename) {
+		zFilename = sanitizeFileName(zFilename);
 		
 		File retfile = null; 
 		
-		//Does the name have any slashes in it..
-		if(zFilename.contains(File.separator) || zFilename.contains("\\") || zFilename.contains("/")) {
-			
-			//It's trying to be an absolute path
+		if(GeneralParams.BASE_FILE_FOLDER.equals("")) {
 			retfile = new File(zFilename);
-		
-		}else if(GeneralParams.BASE_FILE_FOLDER.equals("")) {
-			
-			//Use the default location
-			retfile = new File(zFilename);
-		
 		}else {
-			
-			//Use the base folder as the base
-			retfile = new File(GeneralParams.BASE_FILE_FOLDER,zFilename);
+			retfile = new File(GeneralParams.BASE_FILE_FOLDER, zFilename);
+		}
+		
+		try {
+			String canonicalBase = new File(GeneralParams.BASE_FILE_FOLDER.equals("") ? "." : GeneralParams.BASE_FILE_FOLDER).getCanonicalPath();
+			String canonicalFile = retfile.getCanonicalPath();
+			if (!canonicalFile.startsWith(canonicalBase + File.separator) && !canonicalFile.equals(canonicalBase)) {
+				throw new SecurityException("Path traversal detected: " + zFilename);
+			}
+		} catch (java.io.IOException ioe) {
+			throw new SecurityException("Invalid file path: " + zFilename, ioe);
 		}
 		
 		//Make sure the parent exist..

@@ -147,11 +147,8 @@ public class TxPoWSqlDB extends SqlDB {
 			//Make sure..
 			checkOpen();
 			
-			//Sanitize
-			String where = zWhereCondition.toLowerCase().replaceAll(";", "");
-			where = where.replaceAll("update", "");
-			where = where.replaceAll("delete", "");
-			where = where.replaceAll("insert", "");
+			//Sanitize - only allow alphanumeric, spaces, and basic comparison operators
+			String where = zWhereCondition.replaceAll("[^a-zA-Z0-9 _=<>!'.]", "");
 			
 			//Create the SQL
 			String sql = "SELECT Count(*) AS tot FROM txpow WHERE "+where;

@@ -24,7 +24,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class GenerateKey {
 
 	public static final String 	ASYMETRIC_ALGORITHM_GEN = "RSA";
-	public static final String 	ASYMETRIC_ALGORITHM 	= "RSA/ECB/PKCS1Padding";
+	public static final String 	ASYMETRIC_ALGORITHM 	= "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
 	
 	private static final String SYMETRIC_ALGORITHM_GEN  = "AES";
 	private static final String SYMETRIC_ALGORITHM  	= "AES/CBC/PKCS5Padding";
@@ -36,7 +36,7 @@ public class GenerateKey {
 		SecureRandom random 	= new SecureRandom();
 		
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance(ASYMETRIC_ALGORITHM_GEN);
-        keyGen.initialize(1024, random);
+        keyGen.initialize(2048, random);
         
         KeyPair generateKeyPair = keyGen.generateKeyPair();
         
@@ -104,10 +104,13 @@ public class GenerateKey {
 	
 	public static Cipher getCipherSYM(int zCipherMode, byte[] zIvParam, byte[] zSecretKey) throws Exception {
     	
-    	SecretKey sk 		= GenerateKey.convertSecret(zSecretKey);    	
-    	IvParameterSpec iv 	= new IvParameterSpec(zIvParam);
+		if (zIvParam == null) {
+			zIvParam = IvParam();
+		}
+		SecretKey sk 		= GenerateKey.convertSecret(zSecretKey);    	
+		IvParameterSpec iv 	= new IvParameterSpec(zIvParam);
     	
-    	Cipher aesCipher 	= GenerateKey.getSymetricCipher();
+		Cipher aesCipher 	= GenerateKey.getSymetricCipher();
 		aesCipher.init(zCipherMode, sk, iv);
 		
     	return aesCipher;
