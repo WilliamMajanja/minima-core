@@ -1,0 +1,7 @@
+name: Minima CodeQL Configuration
+paths-ignore:
+  - '**/test/**'
+  - '**/tests/**'
+query-filters:
+  - exclude:
+      - java/unused-local-variable
