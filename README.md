@@ -10,6 +10,7 @@
 ![Swiss Compliance](https://img.shields.io/badge/Swiss_Compliance-nDSG%2FFADP_%7C_FINMA_%7C_AMLA-blueviolet)
 ![UK Compliance](https://img.shields.io/badge/UK_Compliance-UK_GDPR_%7C_CMA_%7C_FSMA_%7C_MLR-blueviolet)
 ![Code Review](https://img.shields.io/badge/Code_Review-Defense_in_Depth-orange)
+![Code Hygiene](https://img.shields.io/badge/Code_Hygiene-0_TODO%2FFIXME%2FHACK-success)
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue)
 
 Minima full node application — a decentralized blockchain node implementation running on the Minima network.
@@ -56,13 +57,13 @@ Minima Global AG is headquartered in **Zug, Switzerland**, placing it under dire
 |----------|-------------|------------|
 | Direct Financial Losses | $26.5M | $1.02B |
 | Regulatory Penalties (14 jurisdictions incl. UK) | $85.7M | $4.4B |
-| Civil Litigation | $63.5M | $615M |
+| Civil Litigation | $64.5M | $615M |
 | Operational Costs | $1.65M | $10.2M |
-| **GRAND TOTAL** | **$177.35M** | **$6.045B** |
+| **GRAND TOTAL** | **$178.35M** | **$6.045B** |
 
 | State | Per-User Cost |
 |-------|--------------|
-| **Unpatched** | $17,735 – $604,500 |
+| **Unpatched** | $17,835 – $604,500 |
 | **Patched (this submission)** | $0 |
 | **Return on Investment** | ∞ |
 
@@ -220,6 +221,10 @@ All fixes are verified by **278 automated tests** (244 existing + 34 security-sp
 - `testRPCClientBlocksCloudMetadata169` — `169.254.169.254` rejected with `IOException`
 - `testValidateFileAccessBlocksTraversal` — `../../../etc/passwd` rejected with `SecurityException`
 - Full details in [SECURITY.md](SECURITY.md) Section 11.
+
+### Code Hygiene Audit
+
+The full source tree is free of `TODO`/`FIXME`/`HACK`/`XXX` markers (commits `ea42444`, `f4988f9`). A silently swallowed exception in `decryptbackup` was fixed, dead debug code hardcoding a peer IP was removed from `P2PManager`, and stale IDE-generated stub comments were cleared. Verification: `grep -rn "TODO\|FIXME\|HACK\|XXX" src/` returns no matches. See [SECURITY.md](SECURITY.md) §12.6.
 
 ---
 

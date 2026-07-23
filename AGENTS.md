@@ -1,0 +1,50 @@
+# AGENTS.md
+
+Guidance for AI agents (opencode, Claude Code, etc.) working in this repository.
+
+## Project
+
+Minima Core — a decentralized blockchain node implementation in Java. Source lives under `src/`, tests under `test/`. Build is Gradle 8.5 targeting Java 11.
+
+## Build & Test
+
+```bash
+# Compile main sources
+./gradlew compileJava
+
+# Full clean build (compiles + tests + shadow jar)
+./gradlew clean build
+
+# Run the test suite (278 tests, must be 0 failures)
+./gradlew test
+
+# Build the fat jar (build/libs/minima-*.jar)
+./gradlew shadowJar
+
+# Helper script (wraps the build + jar copy)
+./buildjars.sh
+```
+
+There is no dedicated lint task; the `compileJava`/`compileTestJava` tasks surface warnings. Re-run `./gradlew test` after any non-trivial change and confirm 278/278 passing before committing.
+
+## Conventions
+
+- **Package layout**: `org.minima.<subsystem>.*` — keep new code under the appropriate subsystem (e.g. `org.minima.system.commands.*` for CLI commands).
+- **Naming**: classes are PascalCase; methods/fields are camelCase. Command classes are lowercase (e.g. `decryptbackup.java`) — follow existing command files when adding one.
+- **No comments unless necessary**: do not add explanatory comments. Do not leave `// TODO Auto-generated` stubs; either implement or remove.
+- **No TODO/FIXME/HACK markers**: track work in issues, not source comments. `grep -rn "TODO\|FIXME\|HACK\|XXX" src/` must return nothing.
+- **Error handling**: never swallow exceptions silently. Log via `MinimaLogger.log(...)` and rethrow or wrap in the domain exception (`CommandException`, `ExecutionException`, etc.).
+- **Security**: see SECURITY.md §7.1 and §11.2 for the mandatory review checklist. In particular: validate file paths (`MiniFile.createBaseFile` + `validateFileAccess`), validate network targets (`validateAndResolveURI`/`validateAndResolveHost`), use parameterized SQL, and require RSA-OAEP-4096 + AES-256-GCM + fresh 12-byte IVs.
+- **Tests**: JUnit 4 (`junit:junit:4.13.2`). Security validation tests live in `test/org/minima/utils/security/SecurityValidationTests.java`. Add a regression test for any security-relevant fix.
+
+## Commit & Push
+
+- Commit messages are concise, imperative, lowercase-first-word-optional style consistent with recent history (e.g. `Clean up TODO/HACK markers: ...`).
+- Do not commit the pre-existing `README.md` / `SECURITY.md` / `WHITEPAPER.md` doc edits unless they are part of the requested change.
+- `main` tracks `origin/main`. Push with `git push` after committing.
+
+## Validation Before Commit
+
+1. `./gradlew compileJava` succeeds (no errors; pre-existing deprecation/unchecked warnings are acceptable)
+2. `./gradlew test` reports 278 tests, 0 failures, 0 errors
+3. `grep -rn "TODO\|FIXME\|HACK\|XXX" src/` returns no matches

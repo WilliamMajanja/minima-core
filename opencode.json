@@ -1,0 +1,32 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["AGENTS.md"],
+  "permission": {
+    "edit": "allow",
+    "bash": {
+      "git push*": "allow",
+      "git commit*": "allow",
+      "git add*": "allow",
+      "git status*": "allow",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "git restore*": "allow",
+      "git rm*": "ask",
+      "git reset*": "ask",
+      "./gradlew compileJava*": "allow",
+      "./gradlew test*": "allow",
+      "./gradlew clean*": "allow",
+      "./gradlew build*": "allow",
+      "./gradlew shadowJar*": "allow",
+      "./gradlew *": "ask",
+      "./buildjars.sh*": "allow",
+      "rg *": "allow",
+      "grep -rn * src/": "allow",
+      "*": "ask"
+    },
+    "external_directory": {
+      "/tmp/opencode/**": "allow",
+      "*": "deny"
+    }
+  }
+}
