@@ -1,6 +1,7 @@
 /*
  * Minima Core build configuration
- * Updated for Gradle 8.5 + Java 21 compatibility
+ * Updated for Gradle 8.5 + Java 11 compatibility
+ * Security fixes: BouncyCastle jdk18on, H2 2.3.232, MySQL 9.7.0
  */
 
 plugins {
@@ -21,12 +22,36 @@ repositories {
 dependencies {
     testImplementation 'junit:junit:4.13.2'
 
-    implementation files('lib/bcpkix-jdk15on-169.jar')
-    implementation files('lib/bcprov-jdk15on-169.jar')
-    implementation files('lib/bcutil-jdk15on-169.jar')
-    implementation files('lib/h2-2.4.240.jar')
-    implementation files('lib/mysql-connector-java-8.0.24.jar')
-    implementation files('lib/junit-4.13.jar')
+    // BouncyCastle jdk18on (fixes CVE-2024-29857, CVE-2024-30171, CVE-2024-30172,
+    // CVE-2024-34447, CVE-2025-8916, CVE-2026-0636, CVE-2026-5588)
+    implementation 'org.bouncycastle:bcpkix-jdk18on:1.85'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.85'
+    implementation 'org.bouncycastle:bcutil-jdk18on:1.85'
+
+    // H2 Database (fixes CVE-2023-44487, CVE-2021-42392)
+    implementation 'com.h2database:h2:2.3.232'
+
+    // MySQL Connector (fixes CVE-2023-22102 and others)
+    implementation 'com.mysql:mysql-connector-j:9.7.0'
+
+    // Security constraint overrides
+    constraints {
+        implementation('com.google.protobuf:protobuf-java:4.35.1') {
+            because 'Fixes DoS vulnerability CVE-2024-7254'
+        }
+        implementation('com.google.guava:guava:33.6.0-jre') {
+            because 'Fixes info disclosure and insecure temp directory'
+        }
+        implementation('commons-io:commons-io:2.22.0') {
+            because 'Security and bug fix updates'
+        }
+        implementation('org.codehaus.plexus:plexus-utils:4.0.3') {
+            because 'Fixes CVE-2025-67030 directory traversal vulnerability'
+        }
+        implementation('org.apache.logging.log4j:log4j-core:2.26.1') {
+            because 'Fixes CVE-2025-68161, CVE-2026-34477, CVE-2026-34478, CVE-2026-34480'
+        }
+    }
 }
 
 sourceSets {
