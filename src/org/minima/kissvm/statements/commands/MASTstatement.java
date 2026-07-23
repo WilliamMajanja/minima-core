@@ -60,7 +60,6 @@ public class MASTstatement implements Statement {
 			throw exc;
 		
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			throw new ExecutionException(e.toString());
 		}		
 	}

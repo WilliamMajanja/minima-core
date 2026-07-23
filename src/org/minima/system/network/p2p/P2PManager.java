@@ -111,7 +111,6 @@ public class P2PManager extends MessageProcessor {
         return (float) state.getNoneP2PLinks().size() / P2PParams.MIN_NUM_CONNECTIONS;
     }
 
-    boolean firstgo = false;
     protected List<Message> init(P2PState state) {
         List<Message> msgs = new ArrayList<>();
         //Get the P2P DB
@@ -183,14 +182,7 @@ public class P2PManager extends MessageProcessor {
         InetSocketAddress connectionAddress = null;
         if (!state.isNoConnect()) {
             
-        	//DEBUG LOOP
-        	if(firstgo) {
-        		firstgo = false;
-        		
-        		connectionAddress = new InetSocketAddress("65.108.211.228", 9001);
-        		MinimaLogger.log("[+] HACK Connect to wrong node: " + connectionAddress);
-        		
-        	}else if (!GeneralParams.P2P_ROOTNODE.isEmpty()) {
+        	if (!GeneralParams.P2P_ROOTNODE.isEmpty()) {
                 String host = GeneralParams.P2P_ROOTNODE.split(":")[0];
                 int port = Integer.parseInt(GeneralParams.P2P_ROOTNODE.split(":")[1]);
                 connectionAddress = new InetSocketAddress(host, port);

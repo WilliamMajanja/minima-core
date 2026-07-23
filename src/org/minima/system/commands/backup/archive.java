@@ -431,16 +431,11 @@ public class archive extends Command {
 				//We don't need any transactions in RamDB
 				MinimaDB.getDB().getTxPoWDB().wipeDBRAM();
 				
-				//Clean system counter
-				counter++;
-				
-				//HACK
-//				if(counter > 0) {
-//					break;
-//				}
-				
-				//HARD RESET - H2 database doesn't like it if I don't do this
-				if(counter % 10 == 0) {
+			//Clean system counter
+			counter++;
+			
+			//HARD RESET - H2 database doesn't like it if I don't do this
+			if(counter % 10 == 0) {
 					//MinimaLogger.log("Clean up memory..");
 					Main.getInstance().resetMemFull();
 				}
@@ -552,17 +547,11 @@ public class archive extends Command {
 					break;
 				}
 				
-				//Do we have enough to ask again.. 
-				if(size==0) {
-					break;
-				}
-				
-				//HACK
-				//if(startblock.isMore(new MiniNumber(100000))) {
-				//	MinimaLogger.log("FORCE ARCHIVE STOP @ 100000");
-				//	break;
-				//}
+			//Do we have enough to ask again.. 
+			if(size==0) {
+				break;
 			}
+		}
 			
 			//Notify the Android Listener
 			NotifyListener(minimalistener,"All blocks loaded.. pls wait");

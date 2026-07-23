@@ -71,7 +71,6 @@ public class printtree extends Command {
 
 	@Override
 	public Command getFunction() {
-		// TODO Auto-generated method stub
 		return new printtree();
 	}
 

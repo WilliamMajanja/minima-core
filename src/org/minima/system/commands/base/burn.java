@@ -203,7 +203,6 @@ public class burn extends Command {
 		Collections.sort(zValues, new Comparator<MiniNumber>() {
 			@Override
 			public int compare(MiniNumber o1, MiniNumber o2) {
-				// TODO Auto-generated method stub
 				return o2.compareTo(o1);
 			}
 		});

@@ -19,6 +19,7 @@ import org.minima.system.commands.Command;
 import org.minima.system.commands.CommandException;
 import org.minima.utils.MiniFile;
 import org.minima.utils.MiniFormat;
+import org.minima.utils.MinimaLogger;
 import org.minima.utils.encrypt.GenerateKey;
 import org.minima.utils.json.JSONObject;
 
@@ -118,9 +119,10 @@ public class decryptbackup extends Command {
 	        while ((length = gzin.read(buffer)) > 0) {
 	            bos.write(buffer, 0, length);
 	        }
-	    }catch (Exception e) {
-			// TODO: handle exception
-		} 
+    }catch (Exception e) {
+		MinimaLogger.log("Error decrypting backup: "+e.getMessage());
+		throw new CommandException("Failed to decrypt backup: "+e.getMessage());
+	}
 		
 		bos.flush();
 		

@@ -639,15 +639,10 @@ public class mysql extends Command {
 				}
 				
 				//Do we have enough to ask again.. 
-				if(size==0) {
-					break;
-				}
-				
-//				//HACK
-//				if(startblock.isMore(new MiniNumber(5000))) {
-//					break;
-//				}
+			if(size==0) {
+				break;
 			}
+		}
 			
 			//Notify the Android Listener
 //			NotifyListener(minimalistener,"All blocks loaded.. pls wait");
@@ -1177,18 +1172,12 @@ public class mysql extends Command {
 						mysql.saveBlock(block);
 					}
 					
-					//Clean up..
-					counter++;
-					if(counter % 10 == 0) {
-						System.gc();
-					}
-					
-					//FOR TESTING
-					/*if(counter>=10) {
-						MinimaLogger.log("HACK FINISH!!");
-						break;
-					}*/
+				//Clean up..
+				counter++;
+				if(counter % 10 == 0) {
+					System.gc();
 				}
+			}
 				
 				//Shutdown TEMP DB
 				rawin.stop();
@@ -1438,7 +1427,6 @@ public class mysql extends Command {
 			System.out.println("Shutdown!");
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
