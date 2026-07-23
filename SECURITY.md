@@ -5,6 +5,7 @@
 ![Tests](https://img.shields.io/badge/Tests-278_passing-brightgreen)
 ![Coverage](https://img.shields.io/badge/Security_Tests-34%2F34_passing-brightgreen)
 ![Crypto](https://img.shields.io/badge/Crypto-RSA--OAEP--4096%20%7C%20AES--256--GCM-blue)
+![CPIP](https://img.shields.io/badge/CPIP_Security_Provider-v4.0.2%20%7C%20AES--256--GCM%20%7C%20ECDSA%20P--256%20%7C%20Kyber-success)
 ![Mainnet](https://img.shields.io/badge/Mainnet-Verified-success)
 ![Swiss Compliance](https://img.shields.io/badge/Swiss_Compliance-nDSG%2FFADP_%7C_FINMA_%7C_AMLA-blueviolet)
 ![UK Compliance](https://img.shields.io/badge/UK_Compliance-UK_GDPR_%7C_CMA_%7C_FSMA_%7C_MLR-blueviolet)
@@ -16,6 +17,32 @@
 This document covers the security vulnerabilities identified in the Minima Core repository, the remediations applied, attack scenarios, and the financial and legal exposure Minima faces if these flaws remain unpatched. It also provides ExploitDB/GHDB reproduction strategies and establishes mandatory ongoing security requirements.
 
 Minima Global AG is incorporated in **Zug, Switzerland**, placing it under the direct jurisdiction of Swiss federal law including nDSG/FADP, FINMA, and the Swiss Criminal Code.
+
+### CPIP Security Provider Integration
+
+Minima Core integrates **The Coffee Protocol (CPIP v4.0.2)** as an external security provider. When `CPIP_ENABLED=1` (default), the following CPIP primitives replace or augment Minima's native crypto:
+
+| CPIP Primitive | Algorithm | Standard | Replaces / Augments |
+|----------------|-----------|----------|---------------------|
+| CoffeeCipher v3 | AES-256-GCM + HKDF-SHA256 | FIPS 197 / SP 800-56C | Native AES-256-GCM (drop-in) |
+| ECDSA P-256 | SHA256withECDSA | FIPS 186-4 | RSA-4096 signatures (SignVerify) |
+| ECDH P-256 | ECDH secp256r1 | FIPS 186-4 / SP 800-56A | N/A (new capability) |
+| RSA-KEM-2048 | RSA-OAEP SHA-256 | FIPS 186-4 / SP 800-56B | RSA-4096-OAEP (CryptoPackage KEM) |
+| HMAC-SHA256 | HMAC-SHA256 tokens | FIPS 180-4 | Basic Auth (Authorizer) |
+| 1nf1D3L Kyber | ML-KEM-768 (non-FIPS, η=3) | Non-FIPS | N/A (optional PQ hybrid) |
+| ITF Defense | Probe blocking, IP blacklist | — | N/A (new defense layer) |
+| FIPS Self-Tests | Power-on KATs | FIPS 140-2/3 | N/A (new assurance) |
+
+**Java Classes Added:** `org.minima.utils.cpip` package:
+- `CoffeeProtocolProvider` — JCA Provider + ITF Defense
+- `CoffeeCipher` — AES-256-GCM + HKDF-SHA256 (interoperable with Python CPIP)
+- `CPIPECDSA` — ECDSA/ECDH P-256 + HMAC-SHA256 RPC tokens
+- `CPIPKEM` — KEM-DEM with RSA-OAEP encapsulation
+- `CPIPSelfTest` — FIPS power-on self-tests
+
+**Backward Compatibility:** When `CPIP_ENABLED=0`, all crypto falls back to native Minima implementations (RSA-4096, AES-256-GCM, PBKDF2). No wire-format changes.
+
+**Regulatory Mapping:** CPIP's FIPS-compliant primitives (AES-256-GCM, ECDSA P-256, RSA-KEM-2048, HKDF-SHA256, HMAC-SHA256) satisfy Swiss nDSG/FADP Art. 7 encryption requirements and UK GDPR Art. 32 pseudonymisation/encryption requirements. The non-FIPS Kyber variant is optional and must be disabled in FIPS mode (`CPIP_FIPS=1`).
 
 ---
 
