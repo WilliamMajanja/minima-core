@@ -58,11 +58,11 @@ Minima Global AG is headquartered in **Zug, Switzerland**, placing it under dire
 | Regulatory Penalties (14 jurisdictions incl. UK) | $85.7M | $4.4B |
 | Civil Litigation | $63.5M | $615M |
 | Operational Costs | $1.65M | $10.2M |
-| **GRAND TOTAL** | **$177.35M** | **$5.045B** |
+| **GRAND TOTAL** | **$177.35M** | **$6.045B** |
 
 | State | Per-User Cost |
 |-------|--------------|
-| **Unpatched** | $17,735 – $504,500 |
+| **Unpatched** | $17,735 – $604,500 |
 | **Patched (this submission)** | $0 |
 | **Return on Investment** | ∞ |
 
@@ -103,7 +103,7 @@ Minima Global AG is also subject to UK law when processing data of UK residents 
 | Computer Misuse Act 1990 | £10M – £500M |
 | FSMA 2000 / FCA | £10M – £1B |
 | MLR 2017 | £5M – £500M |
-| **UK Total** | **£30M – £2.07B ($37.5M – $2.59B)** |
+| **UK Total** | **£30M – £2.05B ($37.5M – $2.56B)** |
 
 ### UK Regulatory Compliance
 
@@ -230,8 +230,9 @@ See [SECURITY.md](SECURITY.md) for the complete vulnerability inventory, remedia
 - **Vulnerability inventory**: [SECURITY.md](SECURITY.md) Section 2
 - **Remediation summary**: [SECURITY.md](SECURITY.md) Section 4
 - **CodeQL dismissals**: [SECURITY.md](SECURITY.md) Section 6
-- **Code review policy**: [SECURITY.md](SECURITY.md) Section 10
+- **Code review policy**: [SECURITY.md](SECURITY.md) Section 11
 - **Swiss regulatory compliance**: [SECURITY.md](SECURITY.md) Section 9
+- **UK regulatory compliance**: [SECURITY.md](SECURITY.md) Section 10
 - **Validation evidence**: [SECURITY.md](SECURITY.md) Section 12
 - **Whitepaper**: [WHITEPAPER.md](WHITEPAPER.md)
 

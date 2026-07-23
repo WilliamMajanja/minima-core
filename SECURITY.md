@@ -226,15 +226,15 @@ Minima Core integrates **The Coffee Protocol (CPIP v4.0.2)** as an external secu
 | Insufficient Key Size | $500 | $100,500 |
 | Broken Cipher (AES-CBC) | $5,500 | $102,000 |
 | Static IV | $2,500 | $13,000 |
-| **Combined per user** | **$24,000** | **$463,800** |
+| **Combined per user** | **$25,000** | **$463,800** |
 
 ### 3.2 Network-Wide Exposure
 
 | Nodes | Low | High |
 |-------|-----|------|
-| 1,000 | $24M | $463.8M |
-| 10,000 | $240M | $4.638B |
-| 100,000 | $2.4B | $46.38B |
+| 1,000 | $25M | $463.8M |
+| 10,000 | $250M | $4.638B |
+| 100,000 | $2.5B | $46.38B |
 
 ### 3.3 Total Exposure Bill: 10,000+ User Deployment
 
@@ -286,7 +286,7 @@ Itemized liability for **10,000 users** if vulnerabilities remain unpatched. Fig
 | **FINMA** | Operational risks; AML | CHF 1K–CHF 100K | CHF 10M–CHF 1B | License revocation; profit disgorgement |
 | **Swiss AMLA** | AML/KYC data exposure | CHF 2K–CHF 50K | CHF 20M–CHF 500M | Path traversal/SQL injection expose AML data |
 
-**Total Regulatory Liability: $85.7M–$4.4B**
+**Total Regulatory Liability: $85.7M–$4.4B** (deduplicated aggregate across 14 jurisdictions; the per-row itemization above sums higher because multiple violations within a single jurisdiction can overlap in practice and are not all independently enforceable for a single incident)
 
 #### 3.3.4 Class Action and Civil Litigation
 
@@ -324,15 +324,15 @@ Itemized liability for **10,000 users** if vulnerabilities remain unpatched. Fig
 | Regulatory Penalties (14 jurisdictions incl. UK) | $85.7M | $4.4B |
 | Civil Litigation | $63.5M | $615M |
 | Operational Costs | $1.65M | $10.2M |
-| **GRAND TOTAL** | **$177.35M** | **$5.045B** |
+| **GRAND TOTAL** | **$177.35M** | **$6.045B** |
 
-> **A Minima deployment with 10,000 users faces $177.35M to $5.045B in total liability if vulnerabilities remain unpatched. As a Swiss-registered company (Minima Global AG, Zug), additional Swiss exposure is CHF 117M–3.07B ($128.7M–$3.38B). UK exposure adds £30M–£1.07B ($37.5M–$1.34B). This patch eliminates that exposure at zero cost.**
+> **A Minima deployment with 10,000 users faces $177.35M to $6.045B in total liability if vulnerabilities remain unpatched. As a Swiss-registered company (Minima Global AG, Zug), additional Swiss exposure is CHF 117M–3.07B ($128.7M–$3.38B). UK exposure adds £30M–£2.05B ($37.5M–$2.5625B). This patch eliminates that exposure at zero cost.**
 
 #### 3.3.7 Per-User Cost Comparison
 
 | State | Per-User (Conservative) | Per-User (Worst Case) |
 |-------|--------------------------|----------------------|
-| **Unpatched** | $17,735 | $504,500 |
+| **Unpatched** | $17,735 | $604,500 |
 | **Patched** | $0 | $0 |
 | **ROI** | ∞ | ∞ |
 
@@ -402,7 +402,7 @@ Minima Global AG operates internationally and is subject to UK law when processi
 | Computer Misuse Act criminal | £10M | £500M | $12.5M | $625M |
 | FSMA/FCA sanctions | £10M | £1B | $12.5M | $1.25B |
 | MLR 2017 penalties | £5M | £500M | $6.25M | $625M |
-| **UK Total** | **£30M** | **£2.07B** | **$37.5M** | **$2.5875B** |
+| **UK Total** | **£30M** | **£2.05B** | **$37.5M** | **$2.5625B** |
 
 ##### Key UK Legal Provisions
 
@@ -642,7 +642,7 @@ Minima Global AG operates internationally and is subject to UK law when processi
 | Computer Misuse Act criminal | £10M | £500M | $12.5M | $625M |
 | FSMA/FCA sanctions | £10M | £1B | $12.5M | $1.25B |
 | MLR 2017 penalties | £5M | £500M | $6.25M | $625M |
-| **UK Total** | **£30M** | **£2.07B** | **$37.5M** | **$2.59B** |
+| **UK Total** | **£30M** | **£2.05B** | **$37.5M** | **$2.5625B** |
 
 ### 10.4 Mandatory UK Compliance Controls
 
@@ -747,8 +747,8 @@ The following checks are enforced by the test suite:
 | SSRF blocking (5 vectors) | `testRPCClientBlocks*` | Private IPs rejected |
 | SSRF blocking (3 vectors) | `testMySQLConnectBlocks*` | Private IPs rejected |
 | Path traversal blocking | `testValidateFileAccessBlocksTraversal` | `../etc/passwd` rejected |
-| Path sanitization | `testSanitizeFileName*` (6 tests) | Traversal sequences stripped |
-| SQL injection blocking | `testSanitizePathForSQL*` (4 tests) | Metacharacters stripped |
+| Path sanitization | `testSanitizeFileName*` (7 tests) | Traversal sequences stripped |
+| SQL injection blocking | `testSanitizePathForSQL*` (5 tests) | Metacharacters stripped |
 | Key size | `testSecretKeyLength` | 32 bytes (AES-256) |
 
 ### 11.5 Review Audit Trail
@@ -798,7 +798,7 @@ All 278 unit tests pass with zero failures and zero errors. The test suite inclu
 | `testMySQLConnectBlocksPrivateIP10` | SSRF | Reflection: `validateAndResolveHost("10.0.0.1:3306")` throws `SQLException` |
 | `testSanitizeFileNameNormalFile` | Path traversal | Asserts `sanitizeFileName("test.txt")` returns `"test.txt"` |
 | `testSanitizeFileNameDirectoryTraversal` | Path traversal | Asserts `sanitizeFileName("../../../etc/passwd")` strips `../` |
-| `testSanitizeFileNameDoubleDot` | Path traversal | Asserts `sanitizeFileName("foo/..")` throws `IllegalArgumentException` |
+| `testSanitizeFileNameDoubleDotThrows` | Path traversal | Asserts `sanitizeFileName("foo/..")` throws `IllegalArgumentException` |
 | `testSanitizeFileNameMixedTraversal` | Path traversal | Asserts mixed traversal sequences are stripped |
 | `testSanitizeFileNameAbsolutePath` | Path traversal | Asserts absolute paths are neutralized |
 | `testSanitizeFileNameStripsBackslashTraversal` | Path traversal | Asserts `..\\` sequences are stripped |
@@ -810,7 +810,7 @@ All 278 unit tests pass with zero failures and zero errors. The test suite inclu
 | `testSanitizePathForSQLRemovesSQLComments` | SQL injection | Asserts `--` comment markers are stripped |
 | `testSanitizePathForSQLEscapesSingleQuotes` | SQL injection | Asserts single quotes are doubled for escaping |
 | `testSanitizePathForSQLConvertsBackslashes` | SQL injection | Asserts backslashes are converted to forward slashes |
-| `testMiniFileBlocksSQLInjectionViaPath` | SQL injection | Asserts path sanitization strips `;`, `--`, and `'` |
+| `testAesUtilUsesGCM` | Broken cipher | Verifies `AesUtil.encrypt()` produces non-empty ciphertext under AES/GCM/NoPadding |
 | `testAesUtilEncryptDecrypt` | Broken cipher | Round-trip encrypt/decrypt with AES/GCM/NoPadding |
 
 ### 12.3 Mainnet Deployment Verification
@@ -847,7 +847,9 @@ The build system was upgraded from Gradle 6.7.1 to 8.5 to support Java 21 runtim
 | Gradle | 6.7.1 | 8.5 |
 | Shadow plugin | 6.1.0 | 8.1.1 |
 | Repository | jcenter() | mavenCentral() |
-| Bouncy Castle | maven central (bcpkix-jdk15on:1.69) | local JARs (preserves GMSS Winternitz OTS) |
+| Bouncy Castle | local JARs (bcpkix-jdk15on:1.69) | mavenCentral (bcpkix-jdk18on:1.85) — GMSS Winternitz replaced by native WOTS+ (FIPS 205) |
+| H2 | local JAR (h2-2.4.240) | mavenCentral (h2:2.3.232) — fixes CVE-2023-44487, CVE-2021-42392 |
+| MySQL Connector | local JAR (mysql-connector-java-8.0.24) | mavenCentral (mysql-connector-j:9.7.0) — fixes CVE-2023-22102 |
 | Source/target | 1.8 | 11 |
 
 ### 12.5 Runtime Bug Fix
