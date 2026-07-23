@@ -313,19 +313,18 @@ public class MegaMMR implements Streamable {
 			Coin cc = new Coin(MiniData.getRandomData(32), address, amount, Token.TOKENID_MINIMA);
 			cc.setMMREntryNumber(mmr.getEntryNumber());
 			
-			//Create the MMRData
-			MMRData mmrdata = MMRData.CreateMMRDataLeafNode(cc, amount);
-			
-			//HACK Add it 
-			mega.getMMR().addEntry(mmrdata);
-			
-			//And to the COIn List..
-			mega.getAllCoins().put(cc.getCoinID().to0xString(), cc);
-		}
-		
-		MMR.printmmrtree(mega.getMMR());
-		
-		mega.getMMR().pruneTree();
+		//Create the MMRData
+		MMRData mmrdata = MMRData.CreateMMRDataLeafNode(cc, amount);
+
+		mega.getMMR().addEntry(mmrdata);
+
+		//And to the COIn List..
+		mega.getAllCoins().put(cc.getCoinID().to0xString(), cc);
+	}
+
+	MMR.printmmrtree(mega.getMMR());
+
+	mega.getMMR().pruneTree();
 		
 		//Now scan
 		mega.pruneUnspendable(true);
@@ -365,22 +364,21 @@ public class MegaMMR implements Streamable {
 			Coin cc = new Coin(MiniData.getRandomData(32), address, amount, Token.TOKENID_MINIMA);
 			cc.setMMREntryNumber(mmr.getEntryNumber());
 			
-			//Create the MMRData
-			MMRData mmrdata = MMRData.CreateMMRDataLeafNode(cc, amount);
-			
-			//HACK Add it 
-			mega.getMMR().addEntry(mmrdata);
-			
-			//And to the COIn List..
-			mega.getAllCoins().put(cc.getCoinID().to0xString(), cc);
-		}
-		
-		MMR.printmmrtree(mega.getMMR());
-		
-		//Now scan
-		mega.pruneUnspendable(true);
-		
-		mega.getMMR().pruneTree();
+		//Create the MMRData
+		MMRData mmrdata = MMRData.CreateMMRDataLeafNode(cc, amount);
+
+		mega.getMMR().addEntry(mmrdata);
+
+		//And to the COIn List..
+		mega.getAllCoins().put(cc.getCoinID().to0xString(), cc);
+	}
+
+	MMR.printmmrtree(mega.getMMR());
+
+	//Now scan
+	mega.pruneUnspendable(true);
+
+	mega.getMMR().pruneTree();
 		
 		MMR.printmmrtree(mega.getMMR());
 		

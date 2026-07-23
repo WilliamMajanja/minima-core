@@ -14,10 +14,7 @@ public class ZipExtractor {
         byte[] buffer = new byte[1024];
         ZipInputStream zis = new ZipInputStream(archive);
         ZipEntry zipEntry = zis.getNextEntry();
-        // TODO validate
-        // TODO we are looking for a package structure that maps to what we would expect including in dapp.yml references
-        // pass in validation logic as an argument
-        
+
         while (zipEntry != null) {
             File newFile = newFile(zDestPath, zipEntry);
             if (zipEntry.isDirectory()) {
