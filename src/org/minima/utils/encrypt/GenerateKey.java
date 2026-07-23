@@ -21,15 +21,21 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.minima.utils.cpip.CoffeeCipher;
+
 public class GenerateKey {
 
 	public static final String 	ASYMETRIC_ALGORITHM_GEN = "RSA";
 	public static final String 	ASYMETRIC_ALGORITHM 	= "RSA/ECB/OAEPWithSHA-256AndMGF1Padding";
-	
+
 	private static final String SYMETRIC_ALGORITHM_GEN  = "AES";
 	private static final String SYMETRIC_ALGORITHM  	= "AES/GCM/NoPadding";
-	
+
 	private static final String SYMETRIC_PASSWORD_ALGORITHM  = "PBKDF2WithHmacSHA256";
+
+	// CPIP CoffeeCipher integration
+	private static final boolean CPIP_ENABLED = "1".equals(System.getenv().getOrDefault("CPIP_ENABLED", "1"));
+	private static final String CPIP_RECIPE = System.getenv().getOrDefault("CPIP_RECIPE", "minima");
 	
 	public static KeyPair generateKeyPair() throws Exception {
 

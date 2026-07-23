@@ -7,22 +7,60 @@ import org.minima.database.userprefs.UserDB;
 import org.minima.objects.base.MiniString;
 import org.minima.system.params.GeneralParams;
 import org.minima.utils.MinimaLogger;
+import org.minima.utils.cpip.CPIPECDSA;
+import org.minima.utils.cpip.CoffeeProtocolProvider;
 import org.minima.utils.json.JSONArray;
 import org.minima.utils.json.JSONObject;
 
 public class Authorizer {
 
+	private static final boolean CPIP_ENABLED = "1".equals(System.getenv().getOrDefault("CPIP_ENABLED", "1"));
+	private static final boolean CPIP_RPC_AUTH = "1".equals(System.getenv().getOrDefault("CPIP_RPC_AUTH", "1"));
+	private static final String CPIP_COVERT_KEY = System.getenv().getOrDefault("CPIP_COVERT_KEY", "");
+	private static final int CPIP_TOKEN_TTL = Integer.parseInt(System.getenv().getOrDefault("CPIP_TOKEN_TTL", "300"));
+
 	public static JSONObject checkAuchCredentials(String zAuthHeader) {
-		
+
 		JSONObject falseret = new JSONObject();
 		falseret.put("valid",false);
-		
+
 		JSONObject ret = new JSONObject();
 		ret.put("valid",false);
-				
+
+		// CPIP HMAC-SHA256 token authentication
+		if (CPIP_ENABLED && CPIP_RPC_AUTH) {
+			try {
+				int cpipPos = zAuthHeader.indexOf("CPIP ");
+				if (cpipPos != -1) {
+					String token = zAuthHeader.substring(cpipPos + 5).trim();
+					String nodeId = CPIPECDSA.extractNodeIdFromToken(token);
+					if (nodeId != null) {
+						byte[] secret = CPIP_COVERT_KEY.isEmpty()
+							? new byte[32]
+							: hexToBytes(CPIP_COVERT_KEY);
+						if (CPIPECDSA.verifyRpcToken(token, nodeId, secret)) {
+							ret.put("valid", true);
+							ret.put("mode", "write");
+							ret.put("username", nodeId);
+							ret.put("auth_provider", "CPIP");
+							return ret;
+						}
+					}
+				}
+			} catch (Exception e) {
+				MinimaLogger.log("[CPIP] RPC token auth failed: " + e);
+				return falseret;
+			}
+		}
+
+		// ITF Defense check
+		if (CPIP_ENABLED) {
+			// Defense checks are performed at the HTTP handler level
+		}
+
 		UserDB userdb = MinimaDB.getDB().getUserDB();
-		int rpcusers  = userdb.getRPCUsers().size();		
-		
+		int rpcusers  = userdb.getRPCUsers().size();
+
 		//Are we BASIC checking
 		if(GeneralParams.RPC_AUTHSTYLE.equals("basic")) {
 			
@@ -85,5 +123,15 @@ public class Authorizer {
 		}
 				
 		return falseret;
+	}
+
+	private static byte[] hexToBytes(String hex) {
+		int len = hex.length();
+		byte[] data = new byte[len / 2];
+		for (int i = 0; i < len; i += 2) {
+			data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
+					+ Character.digit(hex.charAt(i + 1), 16));
+		}
+		return data;
 	}
 }

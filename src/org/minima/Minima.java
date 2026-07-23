@@ -15,6 +15,7 @@ import org.minima.system.params.ParamConfigurer;
 import org.minima.utils.MiniFormat;
 import org.minima.utils.MinimaLogger;
 import org.minima.utils.MinimaUncaughtException;
+import org.minima.utils.cpip.CoffeeProtocolProvider;
 import org.minima.utils.json.JSONArray;
 import org.minima.utils.json.JSONObject;
 
@@ -96,7 +97,14 @@ public class Minima {
 		
 		//we are running
 		mIsRunning = true;
-		
+
+		//Initialize CPIP Security Provider (The Coffee Protocol)
+		try {
+			CoffeeProtocolProvider.initialize();
+		} catch (Exception e) {
+			MinimaLogger.log("[!] CPIP Security Provider initialization failed: "+e);
+		}
+
 		//Set the main data folder
 		File dataFolder 	= new File(System.getProperty("user.home"),".minima");
 		

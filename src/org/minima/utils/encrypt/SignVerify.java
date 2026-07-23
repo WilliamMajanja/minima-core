@@ -8,30 +8,42 @@ import java.security.Security;
 import java.security.Signature;
 
 import org.minima.objects.base.MiniData;
+import org.minima.utils.cpip.CPIPECDSA;
 
 public class SignVerify {
 
 	public static final String SIGN_ALGO 		= "SHA256withRSA";
-	
+	public static final String CPIP_SIGN_ALGO 	= "SHA256withECDSA";
+
+	private static final boolean CPIP_ENABLED = "1".equals(System.getenv().getOrDefault("CPIP_ENABLED", "1"));
+
 	public static byte[] sign(byte[] zPrivateKey, byte[] zMessage) throws Exception {
-		
+
+		if (CPIP_ENABLED) {
+			return CPIPECDSA.sign(zMessage, zPrivateKey);
+		}
+
 		PrivateKey privateKey 	= GenerateKey.convertBytesToPrivate(zPrivateKey);
-		
+
 		Signature signature 	= Signature.getInstance(SIGN_ALGO);
         signature.initSign(privateKey, new SecureRandom());
         signature.update(zMessage);
-        		
+
 		return signature.sign();
 	}
-	
+
 	public static boolean verify(byte[] zPublicKey, byte[] zMessage, byte[] zSignature) throws Exception {
-		
+
+		if (CPIP_ENABLED) {
+			return CPIPECDSA.verify(zMessage, zSignature, zPublicKey);
+		}
+
 		PublicKey publicKey		= GenerateKey.convertBytesToPublic(zPublicKey);
-		
+
 		Signature signature 	= Signature.getInstance(SIGN_ALGO);
         signature.initVerify(publicKey);
         signature.update(zMessage);
-        
+
 		return signature.verify(zSignature);
 	}
 	
