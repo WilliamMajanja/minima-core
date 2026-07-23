@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('build.gradle', 'settings.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Compile
+        run: ./gradlew compileJava compileTestJava
+
+      - name: Test
+        run: ./gradlew test
+
+      - name: Marker scan
+        run: |
+          if grep -rn "TODO\|FIXME\|HACK\|XXX" src/; then
+            echo "Found TODO/FIXME/HACK markers in src/"
+            exit 1
+          fi
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: build/test-results/test/*.xml

@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('build.gradle', 'settings.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Build fat jar
+        run: ./gradlew clean shadowJar
+
+      - name: Run tests
+        run: ./gradlew test
+
+      - name: Resolve artifact path
+        id: jar
+        run: |
+          jar_path=$(ls build/libs/minima-*.jar | head -1)
+          echo "path=$jar_path" >> "$GITHUB_OUTPUT"
+          echo "name=$(basename "$jar_path")" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.jar.outputs.path }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false

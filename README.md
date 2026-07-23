@@ -134,6 +134,17 @@ Or use the helper script:
 ./buildjars.sh
 ```
 
+## Releasing
+
+Releases are automated via GitHub Actions (`.github/workflows/release.yml`). To cut a release:
+
+```bash
+git tag v1.1.2.4
+git push origin v1.1.2.4
+```
+
+The Release workflow builds the fat jar, runs the test suite, and publishes a GitHub Release with the jar attached and auto-generated release notes. CI (`.github/workflows/ci.yml`) runs compile + tests + the TODO/FIXME/HACK marker scan on every push and pull request.
+
 ## Running
 
 ```bash

@@ -48,3 +48,14 @@ There is no dedicated lint task; the `compileJava`/`compileTestJava` tasks surfa
 1. `./gradlew compileJava` succeeds (no errors; pre-existing deprecation/unchecked warnings are acceptable)
 2. `./gradlew test` reports 278 tests, 0 failures, 0 errors
 3. `grep -rn "TODO\|FIXME\|HACK\|XXX" src/` returns no matches
+
+## Releasing
+
+Releases are automated via `.github/workflows/release.yml`. To cut a release, push a `v*` tag:
+
+```bash
+git tag vX.Y.Z.W
+git push origin vX.Y.Z.W
+```
+
+The workflow builds the fat jar (`./gradlew clean shadowJar`), runs the full test suite, and publishes a GitHub Release with the jar attached. CI (`.github/workflows/ci.yml`) runs compile + tests + the marker scan on every push and pull request to `main`.
