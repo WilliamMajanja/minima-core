@@ -19,7 +19,7 @@ ORCID: 0009-0009-0009-0009
 
 ## Abstract
 
-This paper documents the identification, remediation, and validation of 80 security vulnerabilities across 7 categories in Minima Core, a decentralized blockchain node implementation. The vulnerabilities—comprising Server-Side Request Forgery (SSRF), path traversal, SQL injection, weak cryptographic algorithms, insufficient key sizes, broken cipher modes, and static initialization vectors—were detected via GitHub CodeQL static analysis and independently verified through manual code audit. We present defense-in-depth remediations that preserve the original application programming interface, detail the regulatory liability exposure under Swiss federal law (nDSG/FADP, StGB, ZGB Art. 41, FINMA, AMLA), UK law (UK GDPR, DPA 2018, Computer Misuse Act 1990, FSMA 2000, MLR 2017), and international frameworks (GDPR, CCPA, NYDFS), and provide empirical validation through 278 automated unit tests and successful mainnet deployment. The total estimated financial exposure for a 10,000-user deployment ranges from $177.35 million (conservative) to $6.045 billion (worst case), with Swiss-specific liability of CHF 117 million to CHF 3.07 billion and UK-specific liability of £30 million to £2.05 billion. All 80 CodeQL alerts have been dismissed as false positives with documented justification, as the custom validation functions are not recognized by CodeQL's taint tracking engine.
+This paper documents the identification, remediation, and validation of 80 security vulnerabilities across 7 categories in Minima Core, a decentralized blockchain node implementation. The vulnerabilities—comprising Server-Side Request Forgery (SSRF), path traversal, SQL injection, weak cryptographic algorithms, insufficient key sizes, broken cipher modes, and static initialization vectors—were detected via GitHub CodeQL static analysis and independently verified through manual code audit. We present defense-in-depth remediations that preserve the original application programming interface, detail the regulatory liability exposure under Swiss federal law (nDSG/FADP, StGB, ZGB Art. 41, FINMA, AMLA), UK law (UK GDPR, DPA 2018, Computer Misuse Act 1990, FSMA 2000, MLR 2017), and international frameworks (GDPR, CCPA, NYDFS), and provide empirical validation through 278 automated unit tests and successful mainnet deployment. The total estimated financial exposure for a 10,000-user deployment ranges from $178.35 million (conservative) to $6.045 billion (worst case), with Swiss-specific liability of CHF 117 million to CHF 3.07 billion and UK-specific liability of £30 million to £2.05 billion. All 80 CodeQL alerts have been dismissed as false positives with documented justification, as the custom validation functions are not recognized by CodeQL's taint tracking engine.
 
 **Index Terms**—blockchain security, SSRF, path traversal, SQL injection, cryptographic vulnerabilities, defense-in-depth, Swiss regulatory compliance, UK regulatory compliance, CodeQL, static analysis
 
@@ -56,7 +56,7 @@ This paper makes the following contributions:
 5. A detailed Swiss and UK regulatory compliance framework with enforceable penalty schedules
 6. Documentation of CodeQL taint tracking limitations and justification for all 80 alert dismissals
 7. Replacement of the vulnerable BouncyCastle `jdk15on:1.69` GMSS dependency with `jdk18on:1.85` from mavenCentral and a native WOTS+ implementation (NIST FIPS 205, 128-bit post-quantum security), eliminating six CVEs (CVE-2024-29857, CVE-2024-30171, CVE-2024-30172, CVE-2024-34447, CVE-2025-8916, CVE-2026-0636/5588)
-8. Integration of the CPIP Security Provider (The Coffee Protocol v4.0.2) providing AES-256-GCM + HKDF-SHA256, ECDSA/ECDH P-256, RSA-KEM-2048, HMAC-SHA256 RPC tokens, optional Kyber ML-KEM-768, and FIPS 140-2/3 self-tests
+8. Integration of the CPIP Security Provider (The Coffee Protocol v5.0.5) providing AES-256-GCM + HKDF-SHA256, ECDSA/ECDH P-256, RSA-KEM-2048, HMAC-SHA256 RPC tokens, optional Kyber ML-KEM-768, and FIPS 140-2/3 self-tests
 
 ### D. Paper Organization
 
@@ -423,9 +423,9 @@ We developed a per-user cost model based on IBM/Ponemon 2024 Cost of a Data Brea
 |----------|-------------|------------|
 | Direct Financial Losses | $26.5M | $1.02B |
 | Regulatory Penalties (14 jurisdictions incl. UK) | $85.7M | $4.4B |
-| Civil Litigation | $63.5M | $615M |
+| Civil Litigation | $64.5M | $615M |
 | Operational Costs | $1.65M | $10.2M |
-| **Grand Total** | **$177.35M** | **$6.045B** |
+| **Grand Total** | **$178.35M** | **$6.045B** |
 
 The worst-case scenario represents a full exploit chain: SSRF → cloud metadata → internal access → path traversal → wallet keys → total drainage. Cryptocurrency losses are irreversible, as blockchain transactions cannot be reversed without consensus, unlike traditional financial systems with FDIC insurance and chargeback mechanisms.
 
@@ -632,7 +632,7 @@ This has practical implications: organizations incorporated in Switzerland shoul
 
 We have documented the identification, remediation, and validation of 80 security vulnerabilities across 7 categories in the Minima Core blockchain node implementation. The defense-in-depth remediations—SSRF prevention through hostname resolution and private IP blocking, path traversal prevention through canonical path validation, SQL injection prevention through whitelist sanitization, and cryptographic upgrades from RSA-PKCS1v1.5/1024-bit/AES-CBC/static-IV to RSA-OAEP-SHA256/4096-bit/AES-GCM/random-12-byte-IV—have been validated through 278 automated tests and successful mainnet deployment, including the receipt of a live cryptocurrency transaction.
 
-The financial exposure analysis demonstrates that for a 10,000-user deployment, the combined liability ranges from $177.35 million (conservative) to $6.045 billion (worst case), with Swiss-specific liability alone accounting for $128.7 million to $3.38 billion. The patch eliminates this exposure at zero marginal cost.
+The financial exposure analysis demonstrates that for a 10,000-user deployment, the combined liability ranges from $178.35 million (conservative) to $6.045 billion (worst case), with Swiss-specific liability alone accounting for $128.7 million to $3.38 billion. The patch eliminates this exposure at zero marginal cost.
 
 The CodeQL taint tracking limitations identified in this study represent a broader challenge for the security tooling industry: custom validation functions written in application-specific code are fundamentally opaque to static analysis unless explicit model extensions are maintained. We recommend that organizations treat dismissal justifications as living documentation and invest in runtime validation to complement static analysis.
 

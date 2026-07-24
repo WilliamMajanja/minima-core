@@ -25,9 +25,9 @@ public class CoffeeProtocolProvider extends Provider {
     private static final long serialVersionUID = 1L;
 
     public static final String NAME = "CPIP";
-    public static final String VERSION = "4.0.2";
+    public static final String VERSION = "5.0.5";
     public static final String INFO =
-        "CPIP Security Provider — The Coffee Protocol v4.0.2 " +
+        "CPIP Security Provider — The Coffee Protocol v5.0.5 " +
         "(AES-256-GCM, ECDSA P-256, ECDH P-256, HMAC-SHA256, HKDF-SHA256, ITF Defense)";
 
     private static volatile boolean initialized = false;

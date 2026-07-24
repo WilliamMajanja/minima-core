@@ -77,7 +77,7 @@ public class CoffeeCipher {
     /**
      * Derive a 32-byte cipher key from a base key and recipe name.
      * salt = SHA256(b"\xc0\xff\xee" + recipe.getBytes())
-     * info = b"cpip-cipher-v3:" + recipe.getBytes()
+     * info = b"cpip-cipher-v5:" + recipe.getBytes()
      */
     public static byte[] keyFromRecipe(byte[] baseKey, String recipe) {
         try {
@@ -88,7 +88,7 @@ public class CoffeeCipher {
             System.arraycopy(recipeBytes, 0, saltInput, coffeePrefix.length, recipeBytes.length);
             byte[] salt = MessageDigest.getInstance("SHA-256").digest(saltInput);
 
-            byte[] infoPrefix = "cpip-cipher-v3:".getBytes("UTF-8");
+            byte[] infoPrefix = "cpip-cipher-v5:".getBytes("UTF-8");
             byte[] info = new byte[infoPrefix.length + recipeBytes.length];
             System.arraycopy(infoPrefix, 0, info, 0, infoPrefix.length);
             System.arraycopy(recipeBytes, 0, info, infoPrefix.length, recipeBytes.length);
@@ -161,9 +161,9 @@ public class CoffeeCipher {
     public static String hash(byte[] data) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] h = md.digest(concat("cpip-hash-v3:".getBytes("UTF-8"), data));
+            byte[] h = md.digest(concat("cpip-hash-v5:".getBytes("UTF-8"), data));
             for (int i = 0; i < 4; i++) {
-                h = md.digest(concat(concat("cpip-hash-v3:".getBytes("UTF-8"), h), data));
+                h = md.digest(concat(concat("cpip-hash-v5:".getBytes("UTF-8"), h), data));
             }
             StringBuilder hex = new StringBuilder();
             for (byte b : h) {
