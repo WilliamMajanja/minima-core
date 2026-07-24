@@ -5,7 +5,7 @@
 ![Tests](https://img.shields.io/badge/Tests-278_passing-brightgreen)
 ![Coverage](https://img.shields.io/badge/Security_Tests-34%2F34_passing-brightgreen)
 ![Crypto](https://img.shields.io/badge/Crypto-RSA--OAEP--4096%20%7C%20AES--256--GCM-blue)
-![CPIP](https://img.shields.io/badge/CPIP_Security_Provider-v5.0.5%20%7C%20AES--256--GCM%20%7C%20ECDSA%20P--256%20%7C%20Kyber-success)
+![CPIP](https://img.shields.io/badge/CPIP_Security_Provider-v5.1.1%20%7C%20AES--256--GCM%20%7C%20ECDSA%20P--256%20%7C%20Kyber-success)
 ![Mainnet](https://img.shields.io/badge/Mainnet-Verified-success)
 ![Swiss Compliance](https://img.shields.io/badge/Swiss_Compliance-nDSG%2FFADP_%7C_FINMA_%7C_AMLA-blueviolet)
 ![UK Compliance](https://img.shields.io/badge/UK_Compliance-UK_GDPR_%7C_CMA_%7C_FSMA_%7C_MLR-blueviolet)
@@ -20,7 +20,7 @@ Minima Global AG is incorporated in **Zug, Switzerland**, placing it under the d
 
 ### CPIP Security Provider Integration
 
-Minima Core integrates **The Coffee Protocol (CPIP v5.0.5)** as an external security provider. When `CPIP_ENABLED=1` (default), the following CPIP primitives replace or augment Minima's native crypto:
+Minima Core integrates **The Coffee Protocol (CPIP v5.1.1)** as an external security provider. When `CPIP_ENABLED=1` (default), the following CPIP primitives replace or augment Minima's native crypto:
 
 | CPIP Primitive | Algorithm | Standard | Replaces / Augments |
 |----------------|-----------|----------|---------------------|

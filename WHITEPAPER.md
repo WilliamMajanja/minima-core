@@ -56,7 +56,7 @@ This paper makes the following contributions:
 5. A detailed Swiss and UK regulatory compliance framework with enforceable penalty schedules
 6. Documentation of CodeQL taint tracking limitations and justification for all 80 alert dismissals
 7. Replacement of the vulnerable BouncyCastle `jdk15on:1.69` GMSS dependency with `jdk18on:1.85` from mavenCentral and a native WOTS+ implementation (NIST FIPS 205, 128-bit post-quantum security), eliminating six CVEs (CVE-2024-29857, CVE-2024-30171, CVE-2024-30172, CVE-2024-34447, CVE-2025-8916, CVE-2026-0636/5588)
-8. Integration of the CPIP Security Provider (The Coffee Protocol v5.0.5) providing AES-256-GCM + HKDF-SHA256, ECDSA/ECDH P-256, RSA-KEM-2048, HMAC-SHA256 RPC tokens, optional Kyber ML-KEM-768, and FIPS 140-2/3 self-tests
+8. Integration of the CPIP Security Provider (The Coffee Protocol v5.1.1) providing AES-256-GCM + HKDF-SHA256, ECDSA/ECDH P-256, RSA-KEM-2048, HMAC-SHA256 RPC tokens, optional Kyber ML-KEM-768, and FIPS 140-2/3 self-tests
 
 ### D. Paper Organization
 

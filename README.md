@@ -5,7 +5,7 @@
 ![Tests](https://img.shields.io/badge/Tests-278_passing-brightgreen)
 ![Coverage](https://img.shields.io/badge/Security_Tests-34%2F34_passing-brightgreen)
 ![Crypto](https://img.shields.io/badge/Crypto-RSA--OAEP--4096%20%7C%20AES--256--GCM-blue)
-![CPIP](https://img.shields.io/badge/CPIP_Security_Provider-v5.0.5%20%7C%20AES--256--GCM%20%7C%20ECDSA%20P--256%20%7C%20Kyber-success)
+![CPIP](https://img.shields.io/badge/CPIP_Security_Provider-v5.1.1%20%7C%20AES--256--GCM%20%7C%20ECDSA%20P--256%20%7C%20Kyber-success)
 ![Mainnet](https://img.shields.io/badge/Mainnet-Verified-success)
 ![Swiss Compliance](https://img.shields.io/badge/Swiss_Compliance-nDSG%2FFADP_%7C_FINMA_%7C_AMLA-blueviolet)
 ![UK Compliance](https://img.shields.io/badge/UK_Compliance-UK_GDPR_%7C_CMA_%7C_FSMA_%7C_MLR-blueviolet)
@@ -17,7 +17,7 @@ Minima full node application — a decentralized blockchain node implementation 
 
 > **80 CodeQL alerts identified and remediated across 7 vulnerability categories. All alerts dismissed as false positives with documented justifications. See [SECURITY.md](SECURITY.md) for full details.**
 
-> **CPIP Security Provider (The Coffee Protocol v5.0.5) integrated.** When `CPIP_ENABLED=1` (default), Minima uses CoffeeCipher v5 (AES-256-GCM + HKDF-SHA256), ECDSA/ECDH P-256 (FIPS 186-4), RSA-KEM-2048, HMAC-SHA256 RPC tokens, and optional 1nf1D3L Kyber (non-FIPS ML-KEM-768) for post-quantum key exchange. FIPS 140-2/3 self-tests available via `CPIP_FIPS=1`. See [SECURITY.md](SECURITY.md) § CPIP Integration.
+> **CPIP Security Provider (The Coffee Protocol v5.1.1) integrated.** When `CPIP_ENABLED=1` (default), Minima uses CoffeeCipher v5 (AES-256-GCM + HKDF-SHA256), ECDSA/ECDH P-256 (FIPS 186-4), RSA-KEM-2048, HMAC-SHA256 RPC tokens, and optional 1nf1D3L Kyber (non-FIPS ML-KEM-768) for post-quantum key exchange. FIPS 140-2/3 self-tests available via `CPIP_FIPS=1`. See [SECURITY.md](SECURITY.md) § CPIP Integration.
 
 ---
 

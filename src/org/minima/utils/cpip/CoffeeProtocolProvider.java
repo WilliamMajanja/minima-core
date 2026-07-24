@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * CPIP (Coffee Pot Internet Protocol) Java Security Provider.
  *
- * Integrates The Coffee Protocol v5.0.5 cryptographic primitives as a
+ * Integrates The Coffee Protocol v5.1.1 cryptographic primitives as a
  * JCA-compatible security provider for Minima. Provides:
  *
  *  - CoffeeCipher: AES-256-GCM (FIPS 197) with HKDF-SHA256 key derivation
@@ -25,9 +25,9 @@ public class CoffeeProtocolProvider extends Provider {
     private static final long serialVersionUID = 1L;
 
     public static final String NAME = "CPIP";
-    public static final String VERSION = "5.0.5";
+    public static final String VERSION = "5.1.1";
     public static final String INFO =
-        "CPIP Security Provider — The Coffee Protocol v5.0.5 " +
+        "CPIP Security Provider — The Coffee Protocol v5.1.1 " +
         "(AES-256-GCM, ECDSA P-256, ECDH P-256, HMAC-SHA256, HKDF-SHA256, ITF Defense)";
 
     private static volatile boolean initialized = false;
