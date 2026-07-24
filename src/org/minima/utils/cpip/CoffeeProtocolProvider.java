@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * CPIP (Coffee Pot Internet Protocol) Java Security Provider.
  *
- * Integrates The Coffee Protocol v4.0.2 cryptographic primitives as a
+ * Integrates The Coffee Protocol v5.0.5 cryptographic primitives as a
  * JCA-compatible security provider for Minima. Provides:
  *
  *  - CoffeeCipher: AES-256-GCM (FIPS 197) with HKDF-SHA256 key derivation

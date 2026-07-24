@@ -9,14 +9,14 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.SecureRandom;
 
 /**
- * CoffeeCipher v3 — AES-256-GCM (FIPS 197) with HKDF-SHA256 key derivation.
+ * CoffeeCipher v5 — AES-256-GCM (FIPS 197) with HKDF-SHA256 key derivation.
  *
  * Format: nonce (12 bytes) || ciphertext || GCM tag (16 bytes)
  * Key derivation: HKDF-SHA256 (SP 800-56C) with domain-separated info strings.
  *
  * Interoperable with the Python CPIP CoffeeCipher class:
  *   salt = SHA256(b"\xc0\xff\xee" + recipe)
- *   info = b"cpip-cipher-v3:" + recipe
+ *   info = b"cpip-cipher-v5:" + recipe
  *   key = HKDF(base_key, salt, info, 32)
  */
 public class CoffeeCipher {
