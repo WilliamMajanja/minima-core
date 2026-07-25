@@ -4,7 +4,7 @@ Guidance for AI agents (opencode, Claude Code, etc.) working in this repository.
 
 ## Project
 
-Minima Core — a decentralized blockchain node implementation in Java. Source lives under `src/`, tests under `test/`. Build is Gradle 8.5 targeting Java 11.
+Minima Core — a decentralized blockchain node implementation in Java. Source lives under `src/`, tests under `test/`. Build is Gradle 8.12.1 targeting Java 11.
 
 ## Build & Test
 
@@ -36,6 +36,7 @@ There is no dedicated lint task; the `compileJava`/`compileTestJava` tasks surfa
 - **Error handling**: never swallow exceptions silently. Log via `MinimaLogger.log(...)` and rethrow or wrap in the domain exception (`CommandException`, `ExecutionException`, etc.).
 - **Security**: see SECURITY.md §7.1 and §11.2 for the mandatory review checklist. In particular: validate file paths (`MiniFile.createBaseFile` + `validateFileAccess`), validate network targets (`validateAndResolveURI`/`validateAndResolveHost`), use parameterized SQL, and require RSA-OAEP-4096 + AES-256-GCM + fresh 12-byte IVs.
 - **Tests**: JUnit 4 (`junit:junit:4.13.2`). Security validation tests live in `test/org/minima/utils/security/SecurityValidationTests.java`. Add a regression test for any security-relevant fix.
+- **Shadow plugin**: `com.gradleup.shadow:8.3.11` (new plugin ID, migrated from `com.github.johnrengelman.shadow`).
 
 ## Commit & Push
 

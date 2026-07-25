@@ -1,13 +1,13 @@
 /*
  * Minima Core build configuration
- * Updated for Gradle 8.5 + Java 11 compatibility
- * Security fixes: BouncyCastle jdk18on, H2 2.3.232, MySQL 9.7.0
+ * Updated for Gradle 8.10.2 + Java 11 compatibility
+ * Security fixes: BouncyCastle jdk18on, H2 2.4.240, MySQL 9.7.0
  */
 
 plugins {
     id 'java'
     id 'application'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'com.gradleup.shadow' version '8.3.11'
 }
 
 java {
