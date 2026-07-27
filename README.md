@@ -47,81 +47,6 @@ This patch set represents the most thorough security audit and remediation ever 
 
 ---
 
-## Financial Exposure Summary
-
-Minima Global AG is headquartered in **Zug, Switzerland**, placing it under direct jurisdiction of Swiss federal law. It is also subject to UK law when processing data of UK residents or offering cryptoasset services. The full liability analysis is in [SECURITY.md](SECURITY.md).
-
-### Total Exposure: 10,000 Users — Unpatched vs Patched
-
-| Category | Conservative | Worst Case |
-|----------|-------------|------------|
-| Direct Financial Losses | $26.5M | $1.02B |
-| Regulatory Penalties (14 jurisdictions incl. UK) | $85.7M | $4.4B |
-| Civil Litigation | $64.5M | $615M |
-| Operational Costs | $1.65M | $10.2M |
-| **GRAND TOTAL** | **$178.35M** | **$6.045B** |
-
-| State | Per-User Cost |
-|-------|--------------|
-| **Unpatched** | $17,835 – $604,500 |
-| **Patched (this submission)** | $0 |
-| **Return on Investment** | ∞ |
-
-### Swiss Headquarters Liability (Minima Global AG, Zug)
-
-| Regulation | Exposure (10,000 Users) |
-|-----------|------------------------|
-| nDSG/FADP | CHF 7M – 70M |
-| StGB (Criminal Code) | CHF 30M – 500M |
-| ZGB Art. 41 (Tort) | CHF 50M – 1B |
-| FINMA | CHF 10M – 1B |
-| AMLA | CHF 20M – 500M |
-| **Swiss Total** | **CHF 117M – 3.07B ($129M – $3.38B)** |
-
-### Swiss Regulatory Compliance
-
-Minima Global AG is subject to the following Swiss regulations with enforceable penalties:
-
-| Regulation | Provision | Requirement | Penalty |
-|-----------|-----------|-------------|---------|
-| **nDSG/FADP** | Art. 7-8 | Appropriate technical and organizational security measures | CHF 50K/violation; unlimited civil liability |
-| **nDSG/FADP** | Art. 24 | 72-hour breach notification to FDPIC | CHF 50K/violation; unlimited civil liability |
-| **StGB** | Art. 143/144 | Unauthorized data access or damage | Up to 5 years imprisonment + CHF 1.5M corporate fine |
-| **StGB** | Art. 24sexies | Cybercrime: illegal access to data processing systems | Up to 10 years (organized) |
-| **ZGB** | Art. 41 | Tort liability: uncapped compensatory damages for negligence | Unlimited |
-| **FINMA** | Banking Act Art. 7 | Adequate risk management for financial intermediaries | License revocation; profit disgorgement |
-| **AMLA** | Art. 3ff | AML/KYC data protection | CHF 500K–5M per case; criminal if willful |
-
-Mandatory controls: AES-GCM encryption, RSA-OAEP-4096, SSRF prevention, path traversal validation, SQL injection prevention, annual key rotation, audit logging, annual risk assessment. Full policy in [SECURITY.md](SECURITY.md) Section 9.
-
-### United Kingdom Liability
-
-Minima Global AG is also subject to UK law when processing data of UK residents or offering cryptoasset services to UK persons.
-
-| Regulation | Exposure (10,000 Users) |
-|-----------|------------------------|
-| UK GDPR / DPA 2018 | £5M – £50M |
-| Computer Misuse Act 1990 | £10M – £500M |
-| FSMA 2000 / FCA | £10M – £1B |
-| MLR 2017 | £5M – £500M |
-| **UK Total** | **£30M – £2.05B ($37.5M – $2.56B)** |
-
-### UK Regulatory Compliance
-
-| Regulation | Provision | Requirement | Penalty |
-|-----------|-----------|-------------|---------|
-| **UK GDPR** | Art. 5(1)(f) | Integrity and confidentiality of personal data | £17.5M or 4% global turnover |
-| **UK GDPR** | Art. 32 | State-of-the-art security measures | £17.5M or 4% global turnover |
-| **UK GDPR** | Art. 33/34 | 72-hour breach notification to ICO | £8.7M or 2% global turnover |
-| **DPA 2018** | Section 175 | Special category data (financial) | £17.5M or 4% global turnover |
-| **Computer Misuse Act 1990** | Sec. 1/2/3ZA | Unauthorized access; computer misuse articles | Up to 5 years imprisonment + unlimited fine |
-| **FSMA 2000** | Part 4A | FCA cryptoasset registration required | Unlimited fine; criminal prosecution |
-| **MLR 2017** | Regulation 21/27 | AML/KYC customer due diligence and record-keeping | Up to £1M per violation; criminal if willful |
-
-Mandatory controls (UK): Same as Swiss controls plus ICO notification within 72 hours, FCA cryptoasset registration, and CMA-compliant security testing. Full policy in [SECURITY.md](SECURITY.md) Section 10.
-
----
-
 ## Build
 
 ```bash
@@ -241,14 +166,12 @@ The full source tree is free of `TODO`/`FIXME`/`HACK`/`XXX` markers (commits `ea
 
 ## Security
 
-See [SECURITY.md](SECURITY.md) for the complete vulnerability inventory, remediation details, ExploitDB/GHDB reproduction strategies, Swiss regulatory compliance policy, code review policy, and ongoing security requirements.
+See [SECURITY.md](SECURITY.md) for the complete vulnerability inventory, remediation details, ExploitDB/GHDB reproduction strategies, code review policy, and ongoing security requirements.
 
 - **Vulnerability inventory**: [SECURITY.md](SECURITY.md) Section 2
 - **Remediation summary**: [SECURITY.md](SECURITY.md) Section 4
 - **CodeQL dismissals**: [SECURITY.md](SECURITY.md) Section 6
-- **Code review policy**: [SECURITY.md](SECURITY.md) Section 11
-- **Swiss regulatory compliance**: [SECURITY.md](SECURITY.md) Section 9
-- **UK regulatory compliance**: [SECURITY.md](SECURITY.md) Section 10
+- **Code review policy**: [SECURITY.md](SECURITY.md) Section 9
 - **Validation evidence**: [SECURITY.md](SECURITY.md) Section 12
 - **Whitepaper**: [WHITEPAPER.md](WHITEPAPER.md)
 

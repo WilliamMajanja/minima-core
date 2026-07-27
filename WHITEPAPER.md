@@ -11,17 +11,15 @@
 ![Code Review](https://img.shields.io/badge/Code_Review-Defense_in_Depth-orange)
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue)
 
-**William Majanja**  
-Minima Global AG, Zug, Switzerland  
-ORCID: 0009-0009-0009-0009
+**William Majanja**
 
 ---
 
 ## Abstract
 
-This paper documents the identification, remediation, and validation of 80 security vulnerabilities across 7 categories in Minima Core, a decentralized blockchain node implementation. The vulnerabilities—comprising Server-Side Request Forgery (SSRF), path traversal, SQL injection, weak cryptographic algorithms, insufficient key sizes, broken cipher modes, and static initialization vectors—were detected via GitHub CodeQL static analysis and independently verified through manual code audit. We present defense-in-depth remediations that preserve the original application programming interface, detail the regulatory liability exposure under Swiss federal law (nDSG/FADP, StGB, ZGB Art. 41, FINMA, AMLA), UK law (UK GDPR, DPA 2018, Computer Misuse Act 1990, FSMA 2000, MLR 2017), and international frameworks (GDPR, CCPA, NYDFS), and provide empirical validation through 278 automated unit tests and successful mainnet deployment. The total estimated financial exposure for a 10,000-user deployment ranges from $178.35 million (conservative) to $6.045 billion (worst case), with Swiss-specific liability of CHF 117 million to CHF 3.07 billion and UK-specific liability of £30 million to £2.05 billion. All 80 CodeQL alerts have been dismissed as false positives with documented justification, as the custom validation functions are not recognized by CodeQL's taint tracking engine.
+This paper documents the identification, remediation, and validation of 80 security vulnerabilities across 7 categories in Minima Core, a decentralized blockchain node implementation. The vulnerabilities—comprising Server-Side Request Forgery (SSRF), path traversal, SQL injection, weak cryptographic algorithms, insufficient key sizes, broken cipher modes, and static initialization vectors—were detected via GitHub CodeQL static analysis and independently verified through manual code audit. We present defense-in-depth remediations that preserve the original application programming interface and provide empirical validation through 278 automated unit tests and successful mainnet deployment. All 80 CodeQL alerts have been dismissed as false positives with documented justification, as the custom validation functions are not recognized by CodeQL's taint tracking engine.
 
-**Index Terms**—blockchain security, SSRF, path traversal, SQL injection, cryptographic vulnerabilities, defense-in-depth, Swiss regulatory compliance, UK regulatory compliance, CodeQL, static analysis
+**Index Terms**—blockchain security, SSRF, path traversal, SQL injection, cryptographic vulnerabilities, defense-in-depth, CodeQL, static analysis
 
 ---
 
@@ -30,8 +28,6 @@ This paper documents the identification, remediation, and validation of 80 secur
 ### A. Background
 
 Minima Core is a Java-based decentralized blockchain node implementation that forms the backbone of the Minima network. As a full node application, it processes peer-to-peer messages, validates transactions, manages cryptographic keys and wallets, and exposes both a JSON-RPC interface and a command-line interface for user interaction. The codebase comprises approximately 75,000 lines of Java source across 373 files in packages including `org.minima.utils`, `org.minima.database`, `org.minima.system`, and `org.minima.objects`.
-
-Minima Global AG, incorporated in Zug, Switzerland, operates under the direct jurisdiction of Swiss federal law, including the revised Federal Act on Data Protection (nDSG/FADP), the Swiss Criminal Code (StGB), the Swiss Civil Code (ZGB), the Financial Market Supervisory Authority (FINMA) regulations, and the Anti-Money Laundering Act (AMLA). This jurisdictional context creates significant legal exposure for cryptographic and security vulnerabilities that would be considered operational risks in other jurisdictions.
 
 ### B. Problem Statement
 
@@ -52,15 +48,13 @@ This paper makes the following contributions:
 1. A comprehensive vulnerability inventory with root cause analysis for each of the 80 identified issues
 2. Defense-in-depth remediations that preserve backward compatibility while eliminating each vulnerability class
 3. Empirical validation through 278 automated tests (244 existing + 34 security-specific) and successful mainnet deployment
-4. A regulatory liability analysis spanning 14 jurisdictions with per-user cost modeling
-5. A detailed Swiss and UK regulatory compliance framework with enforceable penalty schedules
-6. Documentation of CodeQL taint tracking limitations and justification for all 80 alert dismissals
-7. Replacement of the vulnerable BouncyCastle `jdk15on:1.69` GMSS dependency with `jdk18on:1.85` from mavenCentral and a native WOTS+ implementation (NIST FIPS 205, 128-bit post-quantum security), eliminating six CVEs (CVE-2024-29857, CVE-2024-30171, CVE-2024-30172, CVE-2024-34447, CVE-2025-8916, CVE-2026-0636/5588)
-8. Integration of the CPIP Security Provider (The Coffee Protocol v5.1.1) providing AES-256-GCM + HKDF-SHA256, ECDSA/ECDH P-256, RSA-KEM-2048, HMAC-SHA256 RPC tokens, optional Kyber ML-KEM-768, and FIPS 140-2/3 self-tests
+4. Documentation of CodeQL taint tracking limitations and justification for all 80 alert dismissals
+5. Replacement of the vulnerable BouncyCastle `jdk15on:1.69` GMSS dependency with `jdk18on:1.85` from mavenCentral and a native WOTS+ implementation (NIST FIPS 205, 128-bit post-quantum security), eliminating six CVEs (CVE-2024-29857, CVE-2024-30171, CVE-2024-30172, CVE-2024-34447, CVE-2025-8916, CVE-2026-0636/5588)
+6. Integration of the CPIP Security Provider (The Coffee Protocol v5.1.1) providing AES-256-GCM + HKDF-SHA256, ECDSA/ECDH P-256, RSA-KEM-2048, HMAC-SHA256 RPC tokens, optional Kyber ML-KEM-768, and FIPS 140-2/3 self-tests
 
 ### D. Paper Organization
 
-Section II presents the vulnerability inventory and root cause analysis. Section III details the remediation strategy. Section IV covers the validation methodology. Section V analyzes the financial and legal exposure. Section VI discusses the Swiss and UK regulatory compliance frameworks. Section VII addresses CodeQL limitations. Section VIII presents lessons learned. Section IX concludes.
+Section II presents the vulnerability inventory and root cause analysis. Section III details the remediation strategy. Section IV covers the validation methodology. Section V addresses CodeQL limitations. Section VI presents lessons learned. Section VII concludes.
 
 ---
 
@@ -400,135 +394,7 @@ This demonstrates a critical lesson: **security controls that affect I/O paths m
 
 ---
 
-## V. Financial and Legal Exposure Analysis
-
-### A. Per-User Cost Model
-
-We developed a per-user cost model based on IBM/Ponemon 2024 Cost of a Data Breach Report, GDPR enforcement data, CCPA settlement precedents, NIST SP 800-53 Rev. 5 impact categories, and cryptocurrency incident models. The model accounts for direct financial losses, regulatory penalties, civil litigation, and operational costs.
-
-| Vulnerability | Per User (Conservative) | Per User (Worst Case) |
-|--------------|------------------------|----------------------|
-| SSRF | $2,650 | $22,400 |
-| Path Traversal | $4,650 | $77,400 |
-| SQL Injection | $9,000 | $48,000 |
-| RSA without OAEP | $200 | $100,500 |
-| Insufficient Key Size | $500 | $100,500 |
-| Broken Cipher (AES-CBC) | $5,500 | $102,000 |
-| Static IV | $2,500 | $13,000 |
-| **Combined** | **$25,000** | **$463,800** |
-
-### B. 10,000-User Deployment Exposure
-
-| Category | Conservative | Worst Case |
-|----------|-------------|------------|
-| Direct Financial Losses | $26.5M | $1.02B |
-| Regulatory Penalties (14 jurisdictions incl. UK) | $85.7M | $4.4B |
-| Civil Litigation | $64.5M | $615M |
-| Operational Costs | $1.65M | $10.2M |
-| **Grand Total** | **$178.35M** | **$6.045B** |
-
-The worst-case scenario represents a full exploit chain: SSRF → cloud metadata → internal access → path traversal → wallet keys → total drainage. Cryptocurrency losses are irreversible, as blockchain transactions cannot be reversed without consensus, unlike traditional financial systems with FDIC insurance and chargeback mechanisms.
-
-### C. Attack Chain Analysis
-
-The vulnerabilities are not isolated; they form a causal chain that amplifies individual exploit potential:
-
-1. **SSRF** enables initial access to internal network services and cloud metadata
-2. **Path traversal** enables exfiltration of wallet private keys and configuration files
-3. **SQL injection** enables database destruction and data exfiltration
-4. **Weak cryptography** (RSA-PKCS1v1.5, RSA-1024, AES-CBC, static IV) enables passive decryption of intercepted data without requiring the preceding vulnerabilities
-
-The probability of chained exploitation is significantly higher than individual exploitation, as each vulnerability reduces the barrier to the next.
-
----
-
-## VI. Swiss Regulatory Compliance Framework
-
-### A. Applicable Regulations
-
-Minima Global AG, incorporated in Zug, Switzerland, is subject to the following Swiss federal regulations:
-
-| Regulation | Provision | Requirement | Penalty |
-|-----------|-----------|-------------|---------|
-| nDSG/FADP | Art. 7-8 | Appropriate technical and organizational security measures | CHF 50K/violation; unlimited civil liability |
-| nDSG/FADP | Art. 24 | 72-hour breach notification to FDPIC | CHF 50K/violation; unlimited civil liability |
-| StGB | Art. 143/144 | Unauthorized data access or damage | Up to 5 years imprisonment + CHF 1.5M corporate fine |
-| StGB | Art. 24sexies | Cybercrime: illegal access to data processing systems | Up to 10 years (organized) |
-| StGB | Art. 102 | Corporate criminal liability for organizational failures | CHF 1.5M per violation category |
-| ZGB | Art. 41 | Tort liability: uncapped compensatory damages for negligence | Unlimited |
-| FINMA | Banking Act Art. 7 | Adequate risk management for financial intermediaries | License revocation; profit disgorgement |
-| AMLA | Art. 3ff | AML/KYC data protection from unauthorized access | CHF 500K-5M per case; criminal if willful |
-| **UK GDPR** | Art. 5(1)(f) | Integrity and confidentiality of personal data | £17.5M or 4% global turnover |
-| **UK GDPR** | Art. 32 | State-of-the-art security measures | £17.5M or 4% global turnover |
-| **UK GDPR** | Art. 33/34 | 72-hour breach notification to ICO | £8.7M or 2% global turnover |
-| **DPA 2018** | Section 175 | Special category data (financial) | £17.5M or 4% global turnover |
-| **Computer Misuse Act 1990** | Sec. 1/2/3ZA | Unauthorized access; computer misuse articles | Up to 5 years imprisonment + unlimited fine |
-| **FSMA 2000** | Part 4A | FCA cryptoasset registration required | Unlimited fine; criminal prosecution |
-| **MLR 2017** | Regulation 21/27 | AML/KYC customer due diligence and record-keeping | Up to £1M per violation; criminal if willful |
-
-### B. Swiss Financial Exposure
-
-| Category | CHF (Conservative) | CHF (Worst Case) | USD (Conservative) | USD (Worst Case) |
-|----------|--------------------|--------------------|--------------------|--------------------|
-| nDSG/FADP fines | CHF 5M | CHF 50M | $5.5M | $55M |
-| nDSG/FADP civil | CHF 2M | CHF 20M | $2.2M | $22M |
-| StGB criminal | CHF 30M | CHF 500M | $33M | $550M |
-| ZGB Art. 41 tort | CHF 50M | CHF 1B | $55M | $1.1B |
-| FINMA sanctions | CHF 10M | CHF 1B | $11M | $1.1B |
-| AMLA penalties | CHF 20M | CHF 500M | $22M | $550M |
-| **Swiss Total** | **CHF 117M** | **CHF 3.07B** | **$128.7M** | **$3.38B** |
-
-### C. Mandatory Compliance Controls
-
-We established 8 mandatory compliance controls derived from the nDSG/FADP, StGB, and FINMA requirements:
-
-1. **Encryption Standards**: AES-GCM with random IV (nDSG/FADP Art. 7); RSA-OAEP with 4096-bit keys; AES-CBC and RSA-PKCS1v1.5 prohibited
-2. **Access Controls**: SSRF prevention via `validateAndResolveURI()` and `validateAndResolveHost()` on all network connections (nDSG/FADP Art. 8, FINMA Art. 7)
-3. **Input Validation**: Path traversal prevention via `validateFileAccess()` and SQL injection prevention via whitelist sanitization on all user input (nDSG/FADP Art. 7-8, StGB Art. 143)
-4. **Breach Notification**: 72-hour notification to FDPIC (nDSG/FADP Art. 24)
-5. **AML Data Protection**: Encryption and access control for AML/KYC data (AMLA Art. 3ff)
-6. **Key Management**: Annual key rotation minimum; immediate rotation upon suspected compromise (FINMA circulars)
-7. **Audit Trail**: Timestamped logging of all sensitive data access (nDSG/FADP Art. 7, FINMA Art. 7)
-8. **Risk Assessment**: Annual security risk assessment with 5-year retention (FINMA Art. 7, nDSG/FADP Art. 7)
-
-### D. Enforcement Escalation Matrix
-
-| Severity | Breach Type | Internal SLA | Regulatory Notification |
-|----------|------------|--------------|------------------------|
-| Critical | SSRF exploitation, wallet key compromise | Immediate containment; 4-hour IR | FDPIC within 72 hours; FINMA if systemic |
-| High | Path traversal to AML/KYC data, SQL injection exfiltration | 24-hour containment; 48-hour remediation | FDPIC within 72 hours; AMLA if financial data involved |
-| Medium | Cryptographic weakness exploitation (padding oracle, key recovery) | 72-hour containment; 14-day remediation | FDPIC if personal data affected |
-| Low | Static IV discovery, reconnaissance | 30-day remediation | Document in annual risk assessment |
-
-### E. United Kingdom Regulatory Compliance
-
-Minima Global AG is subject to UK law when processing data of UK residents or offering cryptoasset services to UK persons. The UK's post-Brexit regulatory framework provides independent enforcement powers through the ICO, FCA, NCA, and CPS.
-
-| Regulation | Provision | Requirement | Penalty |
-|-----------|-----------|-------------|---------|
-| **UK GDPR** | Art. 5(1)(f) | Integrity and confidentiality of personal data | £17.5M or 4% global turnover |
-| **UK GDPR** | Art. 32 | State-of-the-art technical and organizational security measures | £17.5M or 4% global turnover |
-| **UK GDPR** | Art. 33/34 | 72-hour breach notification to ICO | £8.7M or 2% global turnover |
-| **DPA 2018** | Section 175 | Special category data (financial) requires enhanced security | £17.5M or 4% global turnover |
-| **Computer Misuse Act 1990** | Sec. 1/2 | Unauthorized access to computer material | Up to 5 years imprisonment + unlimited fine |
-| **Computer Misuse Act 1990** | Sec. 3ZA | Making/supplying articles for computer misuse | Up to 2 years imprisonment |
-| **FSMA 2000** | Part 4A | Cryptoasset activities require FCA registration | Unlimited fine; criminal prosecution |
-| **MLR 2017** | Regulation 21/27 | AML/KYC customer due diligence and record-keeping | Up to £1M per violation; criminal if willful |
-
-**UK Financial Exposure:**
-
-| Category | GBP (Conservative) | GBP (Worst Case) | USD (Conservative) | USD (Worst Case) |
-|----------|--------------------|--------------------|--------------------|--------------------|
-| UK GDPR/DPA 2018 fines | £3M | £30M | $3.75M | $37.5M |
-| UK GDPR/DPA 2018 civil | £2M | £20M | $2.5M | $25M |
-| Computer Misuse Act criminal | £10M | £500M | $12.5M | $625M |
-| FSMA/FCA sanctions | £10M | £1B | $12.5M | $1.25B |
-| MLR 2017 penalties | £5M | £500M | $6.25M | $625M |
-| **UK Total** | **£30M** | **£2.05B** | **$37.5M** | **$2.5625B** |
-
----
-
-## VII. CodeQL Taint Tracking Limitations
+## VI. CodeQL Taint Tracking Limitations
 
 ### A. The False Positive Problem
 
@@ -620,19 +486,11 @@ The migration from `AES/CBC/PKCS5Padding` to `AES/GCM/NoPadding` required not ju
 3. Key derivation algorithm updates (PBKDF2WithHmacSHA1 → PBKDF2WithHmacSHA256)
 4. Backward compatibility with existing encrypted data
 
-### D. Swiss Law Creates Disproportionate Liability for Cryptographic Weaknesses
-
-Under ZGB Art. 41, tort liability for negligence is uncapped. Under StGB Art. 102, corporate criminal liability applies when organizational failures enable security vulnerabilities. The nDSG/FADP Art. 7-8 explicitly requires "appropriate technical and organizational measures" that encompass encryption standards, access controls, and input validation. The combined Swiss exposure (CHF 117M–3.07B) exceeds the combined exposure under GDPR, CCPA, and NYDFS for the same vulnerability set, making Swiss jurisdiction the primary financial risk driver.
-
-This has practical implications: organizations incorporated in Switzerland should prioritize cryptographic remediation above other vulnerability classes because the per-user cost of cryptographic weaknesses ($200–$102,000) reflects the irreversibility of cryptocurrency transactions, which amplifies the ZGB Art. 41 damage calculation.
-
 ---
 
-## IX. Conclusion
+## VIII. Conclusion
 
 We have documented the identification, remediation, and validation of 80 security vulnerabilities across 7 categories in the Minima Core blockchain node implementation. The defense-in-depth remediations—SSRF prevention through hostname resolution and private IP blocking, path traversal prevention through canonical path validation, SQL injection prevention through whitelist sanitization, and cryptographic upgrades from RSA-PKCS1v1.5/1024-bit/AES-CBC/static-IV to RSA-OAEP-SHA256/4096-bit/AES-GCM/random-12-byte-IV—have been validated through 278 automated tests and successful mainnet deployment, including the receipt of a live cryptocurrency transaction.
-
-The financial exposure analysis demonstrates that for a 10,000-user deployment, the combined liability ranges from $178.35 million (conservative) to $6.045 billion (worst case), with Swiss-specific liability alone accounting for $128.7 million to $3.38 billion. The patch eliminates this exposure at zero marginal cost.
 
 The CodeQL taint tracking limitations identified in this study represent a broader challenge for the security tooling industry: custom validation functions written in application-specific code are fundamentally opaque to static analysis unless explicit model extensions are maintained. We recommend that organizations treat dismissal justifications as living documentation and invest in runtime validation to complement static analysis.
 
@@ -654,35 +512,7 @@ All remediated code, test suites, and policy documentation are available in the 
 
 [6] N. J. Al Fardan and K. G. Paterson, "Lucky Thirteen: Breaking the TLS and DTLS Record Protocols," in *IEEE Symposium on Security and Privacy*, 2013, pp. 526–540.
 
-[7] IBM Security, "Cost of a Data Breach Report 2024," IBM Corporation, 2024.
-
-[8] European Parliament and Council, "General Data Protection Regulation (GDPR)," Regulation (EU) 2016/679, 2016.
-
-[9] Swiss Federal Assembly, "Federal Act on Data Protection (nDSG)," SR 235.1, as amended 2023.
-
-[10] Swiss Federal Assembly, "Swiss Criminal Code (StGB)," SR 311.0, Arts. 143, 144, 24sexies, 102.
-
-[11] Swiss Federal Assembly, "Swiss Civil Code (ZGB)," SR 210, Art. 41.
-
-[12] FINMA, "Circular 2018/3: Outsourcing," and "Circular 2016/7: Operational Risks — IT," Swiss Financial Market Supervisory Authority.
-
-[13] Swiss Federal Assembly, "Anti-Money Laundering Act (AMLA)," SR 955.0.
-
-[14] GitHub, Inc., "CodeQL: Discover vulnerabilities across a codebase," https://codeql.github.com/, 2024.
-
-[15] California Legislature, "California Consumer Privacy Act (CCPA)," Cal. Civ. Code §1798.100 et seq., 2018.
-
-[16] New York Department of Financial Services, "Cybersecurity Regulation," 23 NYCRR Part 500, 2017.
-
-[17] UK Parliament, "Data Protection Act 2018," c. 12, 2018.
-
-[18] UK Parliament, "Computer Misuse Act 1990," c. 18, as amended by the Police and Justice Act 2006 and the Serious Crime Act 2015.
-
-[19] UK Parliament, "Financial Services and Markets Act 2000," c. 8, as amended by the Financial Services Act 2012.
-
-[20] UK Parliament, "The Money Laundering, Terrorist Financing and Transfer of Funds (Information on the Payer) Regulations 2017," SI 2017/692, as amended.
-
-[21] Information Commissioner's Office, "Guide to the UK General Data Protection Regulation," ICO, 2024.
+[7] GitHub, Inc., "CodeQL: Discover vulnerabilities across a codebase," https://codeql.github.com/, 2024.
 
 ---
 

