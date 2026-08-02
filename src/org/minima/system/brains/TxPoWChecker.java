@@ -716,7 +716,8 @@ public class TxPoWChecker {
 	}
 	
 	/**
-	 * Check coins for double spend in mempool
+	 * Check coins for double spend in mempool.
+	 * Returns true if ANY coin in zTxPoW is already used by a mempool transaction (conflict detected).
 	 */
 	public static boolean checkMemPoolCoins(TxPoW zTxPoW) {
 		

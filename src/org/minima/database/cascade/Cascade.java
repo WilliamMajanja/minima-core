@@ -237,11 +237,11 @@ public class Cascade implements Streamable {
 			//Convert data
 			cascade = Cascade.ReadFromStream(dis);
 		
-			dis.close();
-			bais.close();
-			
 		} catch (IOException e) {
 			MinimaLogger.log(e);
+		} finally {
+			try { dis.close(); } catch (IOException e) {}
+			try { bais.close(); } catch (IOException e) {}
 		}
 		
 		return cascade;

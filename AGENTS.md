@@ -15,7 +15,7 @@ Minima Core — a decentralized blockchain node implementation in Java. Source l
 # Full clean build (compiles + tests + shadow jar)
 ./gradlew clean build
 
-# Run the test suite (278 tests, must be 0 failures)
+# Run the test suite (290 tests, must be 0 failures)
 ./gradlew test
 
 # Build the fat jar (build/libs/minima-*.jar)
@@ -25,7 +25,7 @@ Minima Core — a decentralized blockchain node implementation in Java. Source l
 ./buildjars.sh
 ```
 
-There is no dedicated lint task; the `compileJava`/`compileTestJava` tasks surface warnings. Re-run `./gradlew test` after any non-trivial change and confirm 278/278 passing before committing.
+There is no dedicated lint task; the `compileJava`/`compileTestJava` tasks surface warnings. Re-run `./gradlew test` after any non-trivial change and confirm 290/290 passing before committing.
 
 ## Conventions
 
@@ -35,6 +35,7 @@ There is no dedicated lint task; the `compileJava`/`compileTestJava` tasks surfa
 - **No TODO/FIXME/HACK markers**: track work in issues, not source comments. `grep -rn "TODO\|FIXME\|HACK\|XXX" src/` must return nothing.
 - **Error handling**: never swallow exceptions silently. Log via `MinimaLogger.log(...)` and rethrow or wrap in the domain exception (`CommandException`, `ExecutionException`, etc.).
 - **Security**: see SECURITY.md §7.1 and §11.2 for the mandatory review checklist. In particular: validate file paths (`MiniFile.createBaseFile` + `validateFileAccess`), validate network targets (`validateAndResolveURI`/`validateAndResolveHost`), use parameterized SQL, and require RSA-OAEP-4096 + AES-256-GCM + fresh 12-byte IVs.
+- **Proof system**: WOTS+ keys must throw on exhaustion (never reset), monotonic cache fields must be reset together, `convertMiniDataVersion()` must not return null, proof chain length must be bounded, all stream deserialization must use try-finally. See SECURITY.md §13 for full details.
 - **Tests**: JUnit 4 (`junit:junit:4.13.2`). Security validation tests live in `test/org/minima/utils/security/SecurityValidationTests.java`. Add a regression test for any security-relevant fix.
 - **Shadow plugin**: `com.gradleup.shadow:8.3.11` (new plugin ID, migrated from `com.github.johnrengelman.shadow`).
 
@@ -47,7 +48,7 @@ There is no dedicated lint task; the `compileJava`/`compileTestJava` tasks surfa
 ## Validation Before Commit
 
 1. `./gradlew compileJava` succeeds (no errors; pre-existing deprecation/unchecked warnings are acceptable)
-2. `./gradlew test` reports 278 tests, 0 failures, 0 errors
+2. `./gradlew test` reports 290 tests, 0 failures, 0 errors
 3. `grep -rn "TODO\|FIXME\|HACK\|XXX" src/` returns no matches
 
 ## Releasing

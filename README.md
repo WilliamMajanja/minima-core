@@ -1,9 +1,9 @@
 # minima-core
 
-![Security Audit](https://img.shields.io/badge/Security_Audit-80_alerts_remediated-brightgreen)
+![Security Audit](https://img.shields.io/badge/Security_Audit-91_alerts_remediated-brightgreen)
 ![CodeQL](https://img.shields.io/badge/CodeQL-80%2F80_passing-brightgreen)
-![Tests](https://img.shields.io/badge/Tests-278_passing-brightgreen)
-![Coverage](https://img.shields.io/badge/Security_Tests-34%2F34_passing-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-290_passing-brightgreen)
+![Coverage](https://img.shields.io/badge/Security_Tests-46%2F46_passing-brightgreen)
 ![Crypto](https://img.shields.io/badge/Crypto-RSA--OAEP--4096%20%7C%20AES--256--GCM-blue)
 ![CPIP](https://img.shields.io/badge/CPIP_Security_Provider-v5.1.1%20%7C%20AES--256--GCM%20%7C%20ECDSA%20P--256%20%7C%20Kyber-success)
 ![Mainnet](https://img.shields.io/badge/Mainnet-Verified-success)
@@ -16,6 +16,8 @@
 Minima full node application — a decentralized blockchain node implementation running on the Minima network.
 
 > **80 CodeQL alerts identified and remediated across 7 vulnerability categories. All alerts dismissed as false positives with documented justifications. See [SECURITY.md](SECURITY.md) for full details.**
+
+> **11 cascading proof system flaws remediated** across MMR proof validation, WOTS+ key lifecycle, monotonic transaction caching, stream resource management, and KISSVM proof execution. See [SECURITY.md](SECURITY.md) §13 for full details.
 
 > **CPIP Security Provider (The Coffee Protocol v5.1.1) integrated.** When `CPIP_ENABLED=1` (default), Minima uses CoffeeCipher v5 (AES-256-GCM + HKDF-SHA256), ECDSA/ECDH P-256 (FIPS 186-4), RSA-KEM-2048, HMAC-SHA256 RPC tokens, and optional 1nf1D3L Kyber (non-FIPS ML-KEM-768) for post-quantum key exchange. FIPS 140-2/3 self-tests available via `CPIP_FIPS=1`. See [SECURITY.md](SECURITY.md) § CPIP Integration.
 
@@ -44,6 +46,7 @@ This patch set represents the most thorough security audit and remediation ever 
 - **SQL Injection**: `searchCoins()` enforces SELECT-only, blocks `UNION`, `;`, `--`, and all DDL/DML keywords. `customSizeQuery()` uses whitelist regex. `SqlDB` sanitizes paths.
 - **Crypto**: RSA-OAEP-SHA256, RSA-4096, AES-256-GCM, PBKDF2WithHmacSHA256, 12-byte random IV.
 - **All 80 CodeQL alerts dismissed** with documented justification in [SECURITY.md](SECURITY.md) Section 6.
+- **11 cascading proof system flaws fixed**: WOTS+ key reuse reset → `SecurityException`, monotonic cache staleness → full reset on clear, CoinProof null dereference → explicit exception, unbounded MMR proof chain → 1024-element cap, empty MMR entry validation → null-data rejection, KISSVM proof DoS → 8 KiB limit, stream resource leaks → try-finally on all `convertMiniDataVersion` methods.
 
 ---
 
@@ -130,14 +133,14 @@ java -jar minima.jar -solo -megammr
 
 ## Validation Evidence
 
-All fixes are verified by **278 automated tests** (244 existing + 34 security-specific) with **zero failures**, plus **live mainnet deployment** receiving real cryptocurrency.
+All fixes are verified by **290 automated tests** (244 existing + 46 security-specific) with **zero failures**, plus **live mainnet deployment** receiving real cryptocurrency.
 
 ### Test Results
 
 | Test Suite | Tests | Passed | Failed | Errors |
 |-----------|-------|--------|--------|--------|
 | Existing Unit Tests | 244 | 244 | 0 | 0 |
-| Security Validation Tests | 34 | 34 | 0 | 0 |
+| Security Validation Tests | 46 | 46 | 0 | 0 |
 
 ### Mainnet Proof
 

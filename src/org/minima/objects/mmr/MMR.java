@@ -374,6 +374,7 @@ public class MMR implements Streamable {
 	 * Update an entry in the MMR.. 
 	 * 
 	 * The proof MUST have been checked before and be valid.
+	 * Callers MUST call checkProofTimeValid() before invoking this method.
 	 */
 	public void updateEntry(MMREntryNumber zEntry, MMRProof zOldProof, MMRData zNewData) {
 		//Get the current peaks
@@ -561,6 +562,11 @@ public class MMR implements Streamable {
 			return true;
 		}
 		
+		//Check the entry actually has data before trusting it
+		if(checker.getMMRData() == null || checker.getMMRData().getData() == null) {
+			return false;
+		}
+		
 		//Are they the same
 		return checker.getMMRData().isEqual(zMMRData);
 	}
@@ -683,29 +689,33 @@ public class MMR implements Streamable {
 	 * Get a DEEP copy of this TxPoW
 	 */
 	public MMR deepCopy(){
+		ByteArrayOutputStream baos = null;
+		DataOutputStream dos = null;
+		ByteArrayInputStream bais = null;
+		DataInputStream dis = null;
 		try {
-			//First write transaction out to a byte array
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			DataOutputStream dos = new DataOutputStream(baos);
+			baos = new ByteArrayOutputStream();
+			dos = new DataOutputStream(baos);
 			writeDataStream(dos);
 			dos.flush();
-			dos.close();
 			
 			byte[] mmrbytes = baos.toByteArray();
-			ByteArrayInputStream bais = new ByteArrayInputStream(mmrbytes);
-			DataInputStream dis = new DataInputStream(bais);
+			bais = new ByteArrayInputStream(mmrbytes);
+			dis = new DataInputStream(bais);
 			
 			MMR deepcopy = new MMR();
 			deepcopy.readDataStream(dis);
-			
-			dis.close();
-			baos.close();
 			
 			return deepcopy;
 			
 		}catch(IOException ioexc) {
 			MinimaLogger.log(ioexc);
-		}	
+		} finally {
+			if(dis != null) try { dis.close(); } catch (IOException e) {}
+			if(bais != null) try { bais.close(); } catch (IOException e) {}
+			if(dos != null) try { dos.close(); } catch (IOException e) {}
+			if(baos != null) try { baos.close(); } catch (IOException e) {}
+		}
 		
 		return null;
 	}

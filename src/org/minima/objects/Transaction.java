@@ -96,6 +96,8 @@ public class Transaction implements Streamable {
 	
 	public void clearIsMonotonic() {
 		mHaveCheckedMonotonic = false;
+		mIsMonotonic = false;
+		mIsValid = false;
 	}
 	
 	public MiniNumber sumInputs() {

@@ -50,6 +50,11 @@ public class PROOF extends MinimaFunction {
 		//Get the proof chain 
 		HexValue chain = zContract.getHexParam(4, this);
 		
+		//Limit proof chain size to prevent DoS via large proofs in scripts
+		if(chain.getMiniData().getBytes().length > 8192) {
+			throw new ExecutionException("MMRProof data too large: "+chain.getMiniData().getBytes().length+" bytes (max 8192)");
+		}
+		
 		//Create into the MMRProof..
 		MMRProof proof = null;
 		try {

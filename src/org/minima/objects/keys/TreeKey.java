@@ -99,10 +99,9 @@ public class TreeKey {
 	
 	public Signature sign(MiniData zData) {
 		
-		//Check range
+		//Check range - WOTS+ is a one-time signature scheme; key reuse enables partial private key recovery
 		if(mUses >= mMaxUses) {
-			MinimaLogger.log("SERIOUS ERROR : MAX TREEKEYS USED @ "+mPublicKey);
-			mUses = 0;
+			throw new SecurityException("WOTS+ key use limit reached ("+mMaxUses+") @ "+mPublicKey+". Key reuse in WOTS+ allows signature forgery.");
 		}
 		
 		//Get the Correct Node path..

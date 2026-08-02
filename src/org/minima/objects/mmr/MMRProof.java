@@ -150,6 +150,8 @@ public class MMRProof implements Streamable {
 		}
 	}
 
+	private static final int MAX_PROOF_CHAIN_LENGTH = 1024;
+	
 	@Override
 	public void readDataStream(DataInputStream zIn) throws IOException {
 		
@@ -159,6 +161,9 @@ public class MMRProof implements Streamable {
 		mProofChain = new ArrayList<>();
 		MiniNumber plen = MiniNumber.ReadFromStream(zIn);
 		int len = plen.getAsInt();
+		if(len < 0 || len > MAX_PROOF_CHAIN_LENGTH) {
+			throw new IOException("Invalid MMRProof chain length: "+len+" (max "+MAX_PROOF_CHAIN_LENGTH+")");
+		}
 		for(int i=0;i<len;i++) {
 			MMRProofChunk chunk = new MMRProofChunk();
 			chunk.readDataStream(zIn);

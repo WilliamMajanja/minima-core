@@ -71,7 +71,11 @@ public class mmrproof extends Command {
 		int index = checkdata.indexOf(":");
 		if(index!=-1) {
 			strdata = checkdata.substring(0, index).trim();
-			mnum	= new MiniNumber(checkdata.substring(index+1).trim());
+			try {
+				mnum	= new MiniNumber(checkdata.substring(index+1).trim());
+			} catch (NumberFormatException e) {
+				throw new CommandException("Invalid numeric value in data parameter: "+checkdata.substring(index+1).trim());
+			}
 		}
 		
 		String fullrootstr 	= getParam("root");
@@ -80,7 +84,11 @@ public class mmrproof extends Command {
 		index = fullrootstr.indexOf(":");
 		if(index!=-1) {
 			rootstr = fullrootstr.substring(0, index).trim();
-			rootnum	= new MiniNumber(fullrootstr.substring(index+1).trim());
+			try {
+				rootnum	= new MiniNumber(fullrootstr.substring(index+1).trim());
+			} catch (NumberFormatException e) {
+				throw new CommandException("Invalid numeric value in root parameter: "+fullrootstr.substring(index+1).trim());
+			}
 		}
 		
 		String proofstr = getParam("proof");

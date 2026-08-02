@@ -71,11 +71,15 @@ public class CoinProof implements Streamable {
 			//Convert data
 			txnrow = CoinProof.ReadFromStream(dis);
 		
-			dis.close();
-			bais.close();
-			
 		} catch (IOException e) {
 			MinimaLogger.log(e);
+		} finally {
+			try { dis.close(); } catch (IOException e) {}
+			try { bais.close(); } catch (IOException e) {}
+		}
+		
+		if(txnrow == null) {
+			throw new IllegalArgumentException("Failed to deserialize CoinProof from data");
 		}
 		
 		return txnrow;

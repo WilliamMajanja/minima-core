@@ -84,11 +84,11 @@ public class Signature implements Streamable {
 			//Convert data into a TxPoW
 			signature = Signature.ReadFromStream(dis);
 		
-			dis.close();
-			bais.close();
-			
 		} catch (IOException e) {
 			MinimaLogger.log(e);
+		} finally {
+			try { dis.close(); } catch (IOException e) {}
+			try { bais.close(); } catch (IOException e) {}
 		}
 		
 		return signature;

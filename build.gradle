@@ -2,6 +2,7 @@
  * Minima Core build configuration
  * Updated for Gradle 8.10.2 + Java 11 compatibility
  * Security fixes: BouncyCastle jdk18on, H2 2.4.240, MySQL 9.7.0
+ * Proof system fixes: WOTS+ key reuse, monotonic cache, MMR bounds, stream safety
  */
 
 plugins {

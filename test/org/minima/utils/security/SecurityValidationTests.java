@@ -3,6 +3,10 @@ package org.minima.utils.security;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -14,6 +18,21 @@ import java.sql.SQLException;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 
+import org.minima.kissvm.Contract;
+import org.minima.objects.Coin;
+import org.minima.objects.CoinProof;
+import org.minima.objects.Transaction;
+import org.minima.objects.Witness;
+import org.minima.objects.base.MiniData;
+import org.minima.objects.base.MiniNumber;
+import org.minima.objects.keys.TreeKey;
+import org.minima.objects.mmr.MMR;
+import org.minima.objects.mmr.MMRData;
+import org.minima.objects.mmr.MMREntry;
+import org.minima.objects.mmr.MMREntryNumber;
+import org.minima.objects.mmr.MMRProof;
+import org.minima.system.commands.CommandException;
+import org.minima.system.commands.base.mmrproof;
 import org.minima.utils.MiniFile;
 import org.minima.utils.RPCClient;
 import org.minima.utils.encrypt.GenerateKey;
@@ -370,5 +389,142 @@ public class SecurityValidationTests {
         String result = sanitizePathForSQL("C:\\Users\\data\\backup.sql");
         assertFalse("Backslashes should be converted to forward slashes", result.contains("\\"));
         assertTrue("Backslashes should be converted to forward slashes", result.contains("/"));
+    }
+
+    // ========== PROOF SYSTEM REGRESSION TESTS ==========
+    // Regression tests for the 11 cascading proof system flaws documented in SECURITY.md §13.
+
+    private static byte[] craftMMRProofStream(int zChainLength) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        MiniNumber.ZERO.writeDataStream(dos);
+        MiniNumber.WriteToStream(dos, zChainLength);
+        dos.flush();
+        return baos.toByteArray();
+    }
+
+    @Test(expected = SecurityException.class)
+    public void testTreeKeySignThrowsOnExhaustion() {
+        TreeKey key = new TreeKey(new MiniData("0x000102"), 2, 2);
+        key.setUses(key.getMaxUses());
+        key.sign(new MiniData("0xFF"));
+    }
+
+    @Test
+    public void testClearIsMonotonicResetsAllCacheFields() {
+        Transaction txn = new Transaction();
+        txn.mHaveCheckedMonotonic = true;
+        txn.mIsMonotonic = true;
+        txn.mIsValid = true;
+        txn.clearIsMonotonic();
+        assertFalse("HaveCheckedMonotonic must reset", txn.mHaveCheckedMonotonic);
+        assertFalse("IsMonotonic must reset", txn.mIsMonotonic);
+        assertFalse("IsValid must reset", txn.mIsValid);
+        assertFalse("isCheckedMonotonic must be false after clear", txn.isCheckedMonotonic());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCoinProofConvertThrowsOnInvalidData() {
+        CoinProof.convertMiniDataVersion(new MiniData("0x00"));
+    }
+
+    @Test
+    public void testCoinProofConvertRoundTrip() throws Exception {
+        Coin coin = new Coin(new MiniData("0x1234"), MiniNumber.ONE, MiniData.ZERO_TXPOWID);
+        MMRProof proof = new MMRProof(MiniNumber.ZERO);
+        CoinProof cp = new CoinProof(coin, proof);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        cp.writeDataStream(dos);
+        dos.flush();
+
+        CoinProof back = CoinProof.convertMiniDataVersion(new MiniData(baos.toByteArray()));
+        assertNotNull("Valid CoinProof must deserialize", back);
+        assertTrue("Coin must round-trip", back.getCoin().getCoinID().isEqual(coin.getCoinID()));
+    }
+
+    @Test(expected = IOException.class)
+    public void testMMRProofRejectsOversizedChain() throws Exception {
+        MMRProof proof = new MMRProof();
+        proof.readDataStream(new DataInputStream(new ByteArrayInputStream(craftMMRProofStream(5000))));
+    }
+
+    @Test(expected = IOException.class)
+    public void testMMRProofRejectsNegativeChainLength() throws Exception {
+        MMRProof proof = new MMRProof();
+        proof.readDataStream(new DataInputStream(new ByteArrayInputStream(craftMMRProofStream(-1))));
+    }
+
+    @Test(expected = IOException.class)
+    public void testMMRProofConvertRejectsOversizedChain() throws Exception {
+        MMRProof.convertMiniDataVersion(new MiniData(craftMMRProofStream(5000)));
+    }
+
+    @Test
+    public void testMMRCheckProofTimeValidRejectsNullDataEntry() {
+        MMR mmr = new MMR();
+        MMRData data = new MMRData(new MiniData("0x00"), MiniNumber.ZERO);
+        mmr.addEntry(data);
+
+        MMREntryNumber entryNum = new MMREntryNumber(0);
+        MMRProof proof = mmr.getProof(entryNum);
+
+        assertTrue("Valid proof must pass before injection", mmr.checkProofTimeValid(entryNum, data, proof));
+
+        mmr.getAllEntries().put("0:" + entryNum.toString(), new MMREntry(0, entryNum, null));
+        assertFalse("Entry with null data must be rejected", mmr.checkProofTimeValid(entryNum, data, proof));
+    }
+
+    @Test
+    public void testMMRDeepCopyPreservesState() throws Exception {
+        MMR mmr = new MMR();
+        mmr.addEntry(new MMRData(new MiniData("0xAA"), MiniNumber.ONE));
+        mmr.addEntry(new MMRData(new MiniData("0xBB"), MiniNumber.TWO));
+
+        MMR copy = mmr.deepCopy();
+        assertNotNull("Deep copy must not be null", copy);
+        assertEquals(mmr.getTotalEntries(), copy.getTotalEntries());
+        assertTrue("Root must round-trip", copy.getRoot().isEqual(mmr.getRoot()));
+    }
+
+    @Test
+    public void testKissvmProofRejectsOversizedProofData() {
+        StringBuilder hex = new StringBuilder("0x");
+        for (int i = 0; i < 9000; i++) {
+            hex.append("00");
+        }
+        Contract ctr = new Contract("RETURN PROOF(0x00 0 0x00 0 " + hex + ")", "", new Witness(), new Transaction(), null);
+        ctr.run();
+        assertTrue("Oversized proof must fail the contract", ctr.isException());
+        assertTrue("Exception must mention the size limit", ctr.getException().contains("8192"));
+    }
+
+    @Test
+    public void testMmrproofCommandRejectsInvalidNumericDataParam() throws Exception {
+        mmrproof cmd = new mmrproof();
+        cmd.getParams().put("data", "0x00:notanumber");
+        cmd.getParams().put("root", "0x00");
+        cmd.getParams().put("proof", "0x00");
+        try {
+            cmd.runCommand();
+            fail("Expected CommandException for invalid data numeric suffix");
+        } catch (CommandException e) {
+            assertTrue(e.getMessage().contains("Invalid numeric value"));
+        }
+    }
+
+    @Test
+    public void testMmrproofCommandRejectsInvalidNumericRootParam() throws Exception {
+        mmrproof cmd = new mmrproof();
+        cmd.getParams().put("data", "0x00");
+        cmd.getParams().put("root", "0x00:notanumber");
+        cmd.getParams().put("proof", "0x00");
+        try {
+            cmd.runCommand();
+            fail("Expected CommandException for invalid root numeric suffix");
+        } catch (CommandException e) {
+            assertTrue(e.getMessage().contains("Invalid numeric value"));
+        }
     }
 }
