@@ -33,7 +33,7 @@ dependencies {
     implementation 'com.h2database:h2:2.4.240'
 
     // MySQL Connector (fixes CVE-2023-22102 and others)
-    implementation 'com.mysql:mysql-connector-j:9.7.0'
+    implementation 'com.mysql:mysql-connector-j:26.7.0'
 
     // Security constraint overrides
     constraints {
