@@ -46,7 +46,7 @@ dependencies {
         implementation('commons-io:commons-io:2.22.0') {
             because 'Security and bug fix updates'
         }
-        implementation('org.codehaus.plexus:plexus-utils:4.0.3') {
+        implementation('org.codehaus.plexus:plexus-utils:4.1.0') {
             because 'Fixes CVE-2025-67030 directory traversal vulnerability'
         }
         implementation('org.apache.logging.log4j:log4j-core:2.26.1') {
