@@ -40,7 +40,7 @@ dependencies {
         implementation('com.google.protobuf:protobuf-java:4.35.1') {
             because 'Fixes DoS vulnerability CVE-2024-7254'
         }
-        implementation('com.google.guava:guava:33.6.0-jre') {
+        implementation('com.google.guava:guava:33.7.1-jre') {
             because 'Fixes info disclosure and insecure temp directory'
         }
         implementation('commons-io:commons-io:2.22.0') {
