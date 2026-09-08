@@ -37,7 +37,7 @@ dependencies {
 
     // Security constraint overrides
     constraints {
-        implementation('com.google.protobuf:protobuf-java:4.35.1') {
+        implementation('com.google.protobuf:protobuf-java:4.36.1') {
             because 'Fixes DoS vulnerability CVE-2024-7254'
         }
         implementation('com.google.guava:guava:33.6.0-jre') {
