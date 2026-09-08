@@ -30,7 +30,7 @@ dependencies {
     implementation 'org.bouncycastle:bcutil-jdk18on:1.85'
 
     // H2 Database (fixes CVE-2023-44487, CVE-2021-42392)
-    implementation 'com.h2database:h2:2.4.240'
+    implementation 'com.h2database:h2:2.5.250'
 
     // MySQL Connector (fixes CVE-2023-22102 and others)
     implementation 'com.mysql:mysql-connector-j:9.7.0'
